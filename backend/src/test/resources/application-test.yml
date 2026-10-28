@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+  flyway:
+    enabled: false
+
+server:
+  port: 0
+
+app:
+  admin:
+    username: admin
+    password: testpassword123
+  cors:
+    allowed-origins: "http://localhost:5173"
+  sync:
+    max-retries: 2
+    retry-delay-ms: 100
+    http-timeout-seconds: 5
+    read-timeout-seconds: 5
+
+logging:
+  level:
+    com.nextrole: INFO
+    org.springframework.security: WARN

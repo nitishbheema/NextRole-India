@@ -1,0 +1,36 @@
+.env
+.env.local
+.env.*.local
+
+# Java
+target/
+*.jar
+*.class
+*.war
+
+# Maven
+.mvn/repository
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore

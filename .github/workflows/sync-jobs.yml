@@ -1,0 +1,72 @@
+name: Sync Jobs
+
+on:
+  schedule:
+    # Runs at 17 minutes past 0,6,12,18 UTC
+    # Approx 5:47 AM, 11:47 AM, 5:47 PM, 11:47 PM IST
+    # Note: GitHub Actions schedules can be delayed by up to several minutes
+    - cron: '17 0,6,12,18 * * *'
+  workflow_dispatch:
+    inputs:
+      debug_logging:
+        description: 'Enable debug logging'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: job-sync
+  cancel-in-progress: false  # Never cancel an in-flight sync
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Synchronize Jobs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build backend
+        working-directory: backend
+        run: |
+          chmod +x ./mvnw
+          ./mvnw package -DskipTests --no-transfer-progress -q
+
+      - name: Run tests
+        working-directory: backend
+        run: ./mvnw test --no-transfer-progress
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Run job synchronization
+        working-directory: backend
+        run: |
+          echo "Starting job synchronization at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          java -jar target/nextrole-backend-1.0.0-SNAPSHOT.jar --sync
+          echo "Synchronization completed at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          SPRING_PROFILES_ACTIVE: sync
+          LOGGING_LEVEL_COM_NEXTROLE: ${{ inputs.debug_logging == 'true' && 'DEBUG' || 'INFO' }}
+        timeout-minutes: 20
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Job synchronization failed. Check the logs above for details."
+          echo "Failed at: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          exit 1
