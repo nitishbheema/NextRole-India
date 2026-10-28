@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from './api';
-import type { Job, JobDetail, JobFilters, PagedResponse, Company, AdminStats, JobSource } from './types';
+import type { Job, JobDetail, JobFilters, PagedResponse, Company, AdminStats, JobSource, PublicSourcesResponse } from './types';
 
 // ------------------------------------------------------------------
 // useDebounce
@@ -133,6 +133,35 @@ export function useCompanies() {
   }, [fetchCompanies]);
 
   return { data, loading, error, refetch: fetchCompanies };
+}
+
+// ------------------------------------------------------------------
+// usePublicSources (100-company registry & public sources directory)
+// ------------------------------------------------------------------
+export function usePublicSources() {
+  const [data, setData] = useState<PublicSourcesResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPublicSources = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get<PublicSourcesResponse>('/api/sources/public');
+      setData(res.data);
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      setError(err?.message || 'Failed to load company directory');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPublicSources();
+  }, [fetchPublicSources]);
+
+  return { data, loading, error, refetch: fetchPublicSources };
 }
 
 // ------------------------------------------------------------------

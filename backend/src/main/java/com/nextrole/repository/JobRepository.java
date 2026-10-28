@@ -81,6 +81,9 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query("SELECT COUNT(j) FROM Job j WHERE j.company.id = :companyId AND j.status = 'ACTIVE'")
     long countActiveByCompanyId(@Param("companyId") Long companyId);
 
+    @Query("SELECT j.company.id, COUNT(j) FROM Job j WHERE j.status = 'ACTIVE' GROUP BY j.company.id")
+    List<Object[]> countActiveGroupedByCompanyId();
+
     @Modifying
     @Query("""
         UPDATE Job j SET j.missingFromSourceCount = j.missingFromSourceCount + 1,

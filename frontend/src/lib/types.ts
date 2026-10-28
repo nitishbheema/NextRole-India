@@ -38,6 +38,42 @@ export interface Company {
   activeJobCount: number;
 }
 
+export type IntegrationStatus = 'ACTIVE_IMPORT' | 'NEEDS_VERIFICATION' | 'LINK_ONLY' | 'UNSUPPORTED' | 'DISABLED';
+
+export interface RegistryCompany {
+  id: number;
+  name: string;
+  category: string;
+  careersUrl: string;
+  sourceType: string;
+  boardIdentifier?: string;
+  integrationStatus: IntegrationStatus;
+  lastCheckedAt?: string | null;
+  lastSuccessAt?: string | null;
+  errorMessage?: string | null;
+  notes?: string;
+  activeJobCount?: number | null;
+  dbCompanyId?: number | null;
+  logoUrl?: string | null;
+}
+
+export interface AggregatorInfo {
+  name: string;
+  url: string;
+  mode: string;
+  note?: string;
+}
+
+export interface PublicSourcesResponse {
+  totalRegisteredCompanies: number;
+  statusBreakdown: Record<string, number>;
+  aggregators: {
+    naukri: AggregatorInfo;
+    unstop: AggregatorInfo;
+  };
+  companies: RegistryCompany[];
+}
+
 export interface JobFilters {
   q?: string;
   company?: string;

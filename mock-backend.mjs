@@ -184,18 +184,27 @@ const server = http.createServer((req, res) => {
         try {
           const raw = fs.readFileSync('backend/src/main/resources/company-sources.json', 'utf8');
           const registry = JSON.parse(raw);
+          const enriched = registry.map(comp => {
+            const matched = seedCompanies.find(sc => sc.name.toLowerCase() === comp.name.toLowerCase());
+            return {
+              ...comp,
+              activeJobCount: matched && matched.activeJobCount > 0 ? matched.activeJobCount : null,
+              dbCompanyId: matched ? matched.id : null,
+              logoUrl: matched ? matched.logoUrl : null,
+            };
+          });
           return sendJson(200, {
-            totalRegisteredCompanies: registry.length,
+            totalRegisteredCompanies: enriched.length,
             statusBreakdown: {
-              ACTIVE_IMPORT: registry.filter(c => c.integrationStatus === 'ACTIVE_IMPORT').length,
-              LINK_ONLY: registry.filter(c => c.integrationStatus === 'LINK_ONLY').length,
-              NEEDS_VERIFICATION: registry.filter(c => c.integrationStatus === 'NEEDS_VERIFICATION').length
+              ACTIVE_IMPORT: enriched.filter(c => c.integrationStatus === 'ACTIVE_IMPORT').length,
+              LINK_ONLY: enriched.filter(c => c.integrationStatus === 'LINK_ONLY').length,
+              NEEDS_VERIFICATION: enriched.filter(c => c.integrationStatus === 'NEEDS_VERIFICATION').length
             },
             aggregators: {
               naukri: { name: 'Naukri.com', url: 'https://www.naukri.com/', mode: 'LINK_ONLY' },
               unstop: { name: 'Unstop', url: 'https://unstop.com/', mode: 'LINK_ONLY' }
             },
-            companies: registry
+            companies: enriched
           });
         } catch (err) {
           return sendJson(500, { error: 'Failed to read registry' });
