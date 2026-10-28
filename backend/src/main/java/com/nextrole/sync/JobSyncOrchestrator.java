@@ -116,7 +116,7 @@ public class JobSyncOrchestrator {
                 Optional<Job> existingOpt = jobRepository.findBySourceIdAndSourceJobId(
                         source.getId(), normalized.sourceJobId());
 
-                if (normalized.isClosed()) {
+                if (normalized.closed()) {
                     if (existingOpt.isPresent()) {
                         Job existing = existingOpt.get();
                         if (existing.getStatus() != JobStatus.EXPIRED) {
