@@ -42,7 +42,7 @@ jobs:
         working-directory: backend
         run: |
           chmod +x ./mvnw
-          ./mvnw package -DskipTests --no-transfer-progress -q
+          ./mvnw package -Dmaven.test.skip=true --no-transfer-progress -q
 
       - name: Run tests
         working-directory: backend
