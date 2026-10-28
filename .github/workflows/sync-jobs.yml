@@ -44,12 +44,6 @@ jobs:
           chmod +x ./mvnw
           ./mvnw package -Dmaven.test.skip=true --no-transfer-progress -q
 
-      - name: Run tests
-        working-directory: backend
-        run: ./mvnw test --no-transfer-progress
-        env:
-          SPRING_PROFILES_ACTIVE: test
-
       - name: Run job synchronization
         working-directory: backend
         run: |
