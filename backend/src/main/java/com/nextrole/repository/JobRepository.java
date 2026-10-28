@@ -29,10 +29,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
         JOIN FETCH j.company c
         JOIN FETCH j.source s
         WHERE j.status = :status
-          AND (:keyword IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-               OR LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
+          AND (:keyword IS NULL OR LOWER(j.title) LIKE CONCAT('%', LOWER(CAST(:keyword AS String)), '%')
+               OR LOWER(j.description) LIKE CONCAT('%', LOWER(CAST(:keyword AS String)), '%'))
           AND (:companyId IS NULL OR c.id = :companyId)
-          AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
+          AND (:location IS NULL OR LOWER(j.location) LIKE CONCAT('%', LOWER(CAST(:location AS String)), '%'))
           AND (:jobType IS NULL OR j.jobType = :jobType)
           AND (:experienceLevel IS NULL OR j.experienceLevel = :experienceLevel)
           AND (:workMode IS NULL OR j.workMode = :workMode)
