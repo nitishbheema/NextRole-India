@@ -25,7 +25,15 @@ public class SyncRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (!args.containsOption("sync")) {
-            log.info("Web server mode. Pass --sync to run job synchronization.");
+            log.info("Web server mode. Triggering background synchronization for enabled ATS feeds...");
+            java.util.concurrent.CompletableFuture.runAsync(() -> {
+                try {
+                    Thread.sleep(4000);
+                    orchestrator.syncAll();
+                } catch (Exception e) {
+                    log.error("Background initial sync error: {}", e.getMessage(), e);
+                }
+            });
             return;
         }
 

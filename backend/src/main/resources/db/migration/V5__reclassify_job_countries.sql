@@ -79,14 +79,19 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO job_sources (company_id, source_type, board_identifier, enabled)
 SELECT c.id, 'GREENHOUSE', 'inmobi', TRUE
 FROM companies c WHERE c.name = 'InMobi'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (company_id, source_type, board_identifier) DO UPDATE SET enabled = TRUE;
 
 INSERT INTO job_sources (company_id, source_type, board_identifier, enabled)
 SELECT c.id, 'GREENHOUSE', 'druva', TRUE
 FROM companies c WHERE c.name = 'Druva'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (company_id, source_type, board_identifier) DO UPDATE SET enabled = TRUE;
 
 INSERT INTO job_sources (company_id, source_type, board_identifier, enabled)
 SELECT c.id, 'GREENHOUSE', 'instawork', TRUE
 FROM companies c WHERE c.name = 'Instawork'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (company_id, source_type, board_identifier) DO UPDATE SET enabled = TRUE;
+
+INSERT INTO job_sources (company_id, source_type, board_identifier, enabled)
+SELECT c.id, 'GREENHOUSE', 'thoughtworks', TRUE
+FROM companies c WHERE c.name = 'Thoughtworks'
+ON CONFLICT (company_id, source_type, board_identifier) DO UPDATE SET enabled = TRUE;
