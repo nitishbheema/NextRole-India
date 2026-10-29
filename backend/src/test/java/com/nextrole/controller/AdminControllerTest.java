@@ -11,6 +11,7 @@ import com.nextrole.service.SyncService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -23,7 +24,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AdminController.class)
-@Import({SecurityConfig.class, CorsConfig.class, AppProperties.class})
+@Import({SecurityConfig.class, CorsConfig.class})
+@EnableConfigurationProperties(AppProperties.class)
 @ActiveProfiles("test")
 class AdminControllerTest {
 
