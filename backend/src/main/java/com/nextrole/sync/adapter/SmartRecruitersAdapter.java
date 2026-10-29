@@ -201,4 +201,27 @@ public class SmartRecruitersAdapter implements JobSourceAdapter {
         if (lower.contains("hybrid")) return WorkMode.HYBRID;
         return WorkMode.ONSITE;
     }
+
+    @Override
+    public boolean isHealthy(JobSource source) {
+        String url = String.format(API_BASE, source.getBoardIdentifier()) + "?limit=1";
+        try {
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(10))
+                    .header("User-Agent", "NextRole-India-JobBot/1.0 (+https://nextrole-india.onrender.com)")
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            return response.statusCode() < 500;
+        } catch (Exception e) {
+            log.debug("SmartRecruiters health check failed for {}: {}", source.getBoardIdentifier(), e.getMessage());
+            return false;
+        }
+    }
 }

@@ -152,25 +152,31 @@ public class EmployerJobService {
             throw new IllegalStateException("Submission is already approved");
         }
 
+        final String companyName = sub.getCompanyName();
+        final String companyWebsite = sub.getCompanyWebsite();
+
         // Find or create company
-        Company company = companyRepository.findByNameIgnoreCase(sub.getCompanyName())
+        Company company = companyRepository.findByNameIgnoreCase(companyName)
                 .orElseGet(() -> {
                     Company newCompany = Company.builder()
-                            .name(sub.getCompanyName())
-                            .careersUrl(sub.getCompanyWebsite())
+                            .name(companyName)
+                            .careersUrl(companyWebsite)
                             .build();
                     return companyRepository.save(newCompany);
                 });
 
+        final Company targetCompany = company;
+        final Long companyId = company.getId();
+
         // Find or create default direct employer source
-        JobSource source = jobSourceRepository.findByCompanyIdAndSourceType(company.getId(), SourceType.UNSUPPORTED)
+        JobSource source = jobSourceRepository.findByCompanyIdAndSourceType(companyId, SourceType.UNSUPPORTED)
                 .stream()
                 .findFirst()
                 .orElseGet(() -> {
                     JobSource newSource = JobSource.builder()
-                            .company(company)
+                            .company(targetCompany)
                             .sourceType(SourceType.UNSUPPORTED)
-                            .boardIdentifier("employer-direct-" + company.getId())
+                            .boardIdentifier("employer-direct-" + companyId)
                             .enabled(true)
                             .build();
                     return jobSourceRepository.save(newSource);
@@ -179,7 +185,7 @@ public class EmployerJobService {
         // Create published active Job
         String sourceJobId = "EMP-" + sub.getReferenceId();
         Job job = Job.builder()
-                .company(company)
+                .company(targetCompany)
                 .source(source)
                 .sourceJobId(sourceJobId)
                 .title(sub.getJobTitle())
@@ -199,20 +205,20 @@ public class EmployerJobService {
                 .isEmployerSubmitted(true)
                 .build();
 
-        job = jobRepository.save(job);
+        Job savedJob = jobRepository.save(job);
 
         // Update submission
         SubmissionStatus oldStatus = sub.getStatus();
         sub.setStatus(SubmissionStatus.APPROVED);
-        sub.setPublishedJob(job);
+        sub.setPublishedJob(savedJob);
         sub.setReviewerUsername(adminUsername);
         sub.setReviewerNotes(notes);
         sub.setReviewedAt(LocalDateTime.now());
-        sub = submissionRepository.save(sub);
+        EmployerJobSubmission updatedSub = submissionRepository.save(sub);
 
         // Add history audit
         SubmissionStatusHistory history = SubmissionStatusHistory.builder()
-                .submission(sub)
+                .submission(updatedSub)
                 .fromStatus(oldStatus)
                 .toStatus(SubmissionStatus.APPROVED)
                 .notes(notes != null && !notes.isBlank() ? notes : "Approved by administrator")
@@ -221,9 +227,9 @@ public class EmployerJobService {
         historyRepository.save(history);
 
         log.info("Admin {} approved submission id={}, ref={}. Published Job id={}",
-                adminUsername, id, sub.getReferenceId(), job.getId());
+                adminUsername, id, updatedSub.getReferenceId(), savedJob.getId());
 
-        return toAdminDto(sub);
+        return toAdminDto(updatedSub);
     }
 
     @Transactional

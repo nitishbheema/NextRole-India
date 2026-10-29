@@ -205,7 +205,11 @@ public class AdminController {
                     } catch (Exception ignored) {
                     }
 
-                    adminService.createSource(new CreateSourceRequest(company.id(), st, boardId));
+                    CreateSourceRequest req = new CreateSourceRequest();
+                    req.setCompanyId(company.id());
+                    req.setSourceType(st.name());
+                    req.setBoardIdentifier(boardId);
+                    adminService.createSource(req);
                     importedCount++;
                 } catch (Exception e) {
                     errors.add("Line " + (i + 1) + ": " + e.getMessage());
