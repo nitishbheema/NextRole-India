@@ -25,7 +25,19 @@ jobs:
         working-directory: backend
         run: |
           chmod +x ./mvnw
-          ./mvnw test --no-transfer-progress || (for f in target/surefire-reports/*.txt; do echo "=== $f ==="; cat "$f"; done; exit 1)
+          if ! ./mvnw test --no-transfer-progress -l maven-build.log; then
+            cat maven-build.log
+            grep -E "\[ERROR\]" maven-build.log | while read -r line; do
+              echo "::error title=Maven Error::$line"
+            done
+            for f in target/surefire-reports/*.txt; do
+              if [ -f "$f" ]; then
+                msg=$(head -n 20 "$f" | tr '\n' ' ')
+                echo "::error file=$f,title=Test Failure::$msg"
+              fi
+            done
+            exit 1
+          fi
         env:
           SPRING_PROFILES_ACTIVE: test
 
