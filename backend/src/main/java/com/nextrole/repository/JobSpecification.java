@@ -13,6 +13,11 @@ public class JobSpecification {
 
     public static Specification<Job> withFilters(JobFilterRequest request) {
         return (root, query, cb) -> {
+            if (query != null && Long.class != query.getResultType() && long.class != query.getResultType()) {
+                root.fetch("company", jakarta.persistence.criteria.JoinType.LEFT);
+                root.fetch("source", jakarta.persistence.criteria.JoinType.LEFT);
+            }
+
             List<Predicate> predicates = new ArrayList<>();
 
             // Always only show ACTIVE jobs to public visitors

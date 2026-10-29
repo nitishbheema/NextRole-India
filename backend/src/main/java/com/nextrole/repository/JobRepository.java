@@ -23,10 +23,6 @@ import java.util.Optional;
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
 
-    @Override
-    @EntityGraph(attributePaths = {"company", "source"})
-    Page<Job> findAll(Specification<Job> spec, Pageable pageable);
-
     Optional<Job> findBySourceIdAndSourceJobId(Long sourceId, String sourceJobId);
 
     List<Job> findBySourceId(Long sourceId);

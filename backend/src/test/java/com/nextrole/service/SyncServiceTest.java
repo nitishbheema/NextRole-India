@@ -25,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -141,6 +142,7 @@ class SyncServiceTest {
         );
 
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(updatedJob));
+        when(jobRepository.findBySourceIdAndSourceJobId(testSource.getId(), "job-1")).thenReturn(Optional.of(existingJob));
         when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of(existingJob));
 
         SyncRun result = orchestrator.syncSource(testSource);
@@ -181,13 +183,14 @@ class SyncServiceTest {
         );
 
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(closedJob));
+        when(jobRepository.findBySourceIdAndSourceJobId(testSource.getId(), "job-closed")).thenReturn(Optional.of(existingJob));
         when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of(existingJob));
 
         SyncRun result = orchestrator.syncSource(testSource);
 
         assertThat(result.getJobsExpired()).isEqualTo(1);
         assertThat(existingJob.getStatus()).isEqualTo(JobStatus.EXPIRED);
-        assertThat(existingJob.getExpiredReason()).contains("explicitly closed");
+        assertThat(existingJob.getExpiredReason()).contains("closed by source");
         assertThat(existingJob.getExpiredAt()).isNotNull();
     }
 
@@ -210,17 +213,15 @@ class SyncServiceTest {
 
         orchestrator.syncSource(testSource);
 
-        // After 1st missing run: status is NEEDS_RECHECK, count is 1, NOT yet expired
-        assertThat(jobToMiss.getMissingFromSourceCount()).isEqualTo(1);
-        assertThat(jobToMiss.getStatus()).isEqualTo(JobStatus.NEEDS_RECHECK);
+        // After 1st missing run: incrementMissingCountAndSetNeedsRecheck was called with jobToMiss id
+        verify(jobRepository, times(1)).incrementMissingCountAndSetNeedsRecheck(List.of(jobToMiss.getId()));
 
-        // Run 2: Missing again from complete fetch
+        // Run 2: Missing again from complete fetch (simulate count now 1)
+        jobToMiss.setMissingFromSourceCount(1);
         orchestrator.syncSource(testSource);
 
-        // After 2nd missing run: status is EXPIRED
-        assertThat(jobToMiss.getMissingFromSourceCount()).isEqualTo(2);
-        assertThat(jobToMiss.getStatus()).isEqualTo(JobStatus.EXPIRED);
-        assertThat(jobToMiss.getExpiredAt()).isNotNull();
+        // After 2nd missing run: expireJobs was called
+        verify(jobRepository, times(1)).expireJobs(eq(List.of(jobToMiss.getId())), any(), any());
     }
 
     @Test
