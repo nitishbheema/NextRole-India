@@ -3,6 +3,7 @@ package com.nextrole.service;
 import com.nextrole.entity.Company;
 import com.nextrole.entity.Job;
 import com.nextrole.entity.JobSource;
+import com.nextrole.entity.SyncRun;
 import com.nextrole.enums.ExperienceLevel;
 import com.nextrole.enums.JobStatus;
 import com.nextrole.enums.JobType;
