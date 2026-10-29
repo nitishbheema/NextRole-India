@@ -51,6 +51,7 @@ public class EmployerJobService {
         // Perform security & link scanning
         PhishSenseClient.PhishSenseScanResult scanResult = phishSenseClient.scanUrl(request.getApplyUrl(), request.getCompanyWebsite());
 
+        boolean isPersonal = isPersonalEmail(request.getRecruiterEmail());
         SubmissionStatus initialStatus = SubmissionStatus.PENDING_VERIFICATION;
         if (scanResult.riskLabel() == RiskLabel.MALICIOUS || scanResult.threatScore() >= 60) {
             initialStatus = SubmissionStatus.FLAGGED_FOR_SECURITY_REVIEW;
@@ -60,12 +61,13 @@ public class EmployerJobService {
 
         String riskDetails = "";
         try {
-            riskDetails = objectMapper.writeValueAsString(Map.of(
-                    "flags", scanResult.flags(),
-                    "source", scanResult.source(),
-                    "threatScore", scanResult.threatScore(),
-                    "isLiveApi", scanResult.isLiveApiCall()
-            ));
+            Map<String, Object> detailsMap = new HashMap<>();
+            detailsMap.put("flags", scanResult.flags() != null ? scanResult.flags() : List.of());
+            detailsMap.put("source", scanResult.source() != null ? scanResult.source() : "Internal Security Guard");
+            detailsMap.put("threatScore", scanResult.threatScore());
+            detailsMap.put("isLiveApi", scanResult.isLiveApiCall());
+            detailsMap.put("isPersonalEmail", isPersonal);
+            riskDetails = objectMapper.writeValueAsString(detailsMap);
         } catch (Exception ignored) {
         }
 
@@ -94,24 +96,31 @@ public class EmployerJobService {
 
         submission = submissionRepository.save(submission);
 
-        // Record initial status history
+        // Record initial status history with bidirectional link
+        String auditNote = "Submitted by recruiter (" + request.getRecruiterName() + ")"
+                + (isPersonal ? " [Personal email - manual company credentials verification required]" : " [Company domain]")
+                + ". Automated scan: " + scanResult.riskLabel() + " (Score " + scanResult.threatScore() + ")";
+
         SubmissionStatusHistory history = SubmissionStatusHistory.builder()
                 .submission(submission)
                 .fromStatus(null)
                 .toStatus(initialStatus)
-                .notes("Submitted by employer (" + request.getRecruiterName() + "). Automated scan: " + scanResult.riskLabel() + " (Score " + scanResult.threatScore() + ")")
+                .notes(auditNote)
                 .changedBy("SYSTEM")
                 .build();
+        submission.addStatusHistory(history);
         historyRepository.save(history);
 
         log.info("Saved employer submission ref={} for company={} with status={}",
                 referenceId, submission.getCompanyName(), initialStatus);
 
+        LocalDateTime submittedAt = submission.getCreatedAt() != null ? submission.getCreatedAt() : LocalDateTime.now();
+
         return new EmployerJobSubmissionResponse(
                 referenceId,
                 initialStatus,
                 "Your job posting has been submitted and is under verification. Our team will review the company details and application link before publishing it. You will be notified when a decision is made.",
-                submission.getCreatedAt()
+                submittedAt
         );
     }
 
@@ -224,6 +233,7 @@ public class EmployerJobService {
                 .notes(notes != null && !notes.isBlank() ? notes : "Approved by administrator")
                 .changedBy(adminUsername)
                 .build();
+        updatedSub.addStatusHistory(history);
         historyRepository.save(history);
 
         log.info("Admin {} approved submission id={}, ref={}. Published Job id={}",
@@ -251,6 +261,7 @@ public class EmployerJobService {
                 .notes(notes)
                 .changedBy(adminUsername)
                 .build();
+        sub.addStatusHistory(history);
         historyRepository.save(history);
 
         return toAdminDto(sub);
@@ -275,6 +286,7 @@ public class EmployerJobService {
                 .notes(notes)
                 .changedBy(adminUsername)
                 .build();
+        sub.addStatusHistory(history);
         historyRepository.save(history);
 
         return toAdminDto(sub);
@@ -304,15 +316,31 @@ public class EmployerJobService {
     }
 
     private void validateBusinessEmail(String email) {
-        if (email == null) return;
-        String domain = email.substring(email.indexOf("@") + 1).toLowerCase().trim();
+        if (email == null || email.isBlank()) return;
+        int atIdx = email.indexOf("@");
+        if (atIdx == -1) {
+            throw new IllegalArgumentException("Invalid recruiter email address.");
+        }
+        String domain = email.substring(atIdx + 1).toLowerCase().trim();
         List<String> disposableDomains = List.of(
                 "tempmail.com", "throwawaymail.com", "guerrillamail.com", "mailinator.com",
-                "10minutemail.com", "trashmail.com", "yopmail.com", "sharklasers.com"
+                "10minutemail.com", "trashmail.com", "yopmail.com", "sharklasers.com",
+                "getnada.com", "dispostable.com", "fakeinbox.com", "mohmal.com"
         );
         if (disposableDomains.contains(domain)) {
-            throw new IllegalArgumentException("Disposable email addresses are not permitted. Please use your official company recruiter email.");
+            throw new IllegalArgumentException("Disposable email addresses are not permitted. Please use your official company or professional email.");
         }
+    }
+
+    private boolean isPersonalEmail(String email) {
+        if (email == null) return false;
+        int atIdx = email.indexOf("@");
+        if (atIdx == -1) return false;
+        String domain = email.substring(atIdx + 1).toLowerCase().trim();
+        List<String> personalDomains = List.of(
+                "gmail.com", "yahoo.com", "yahoo.co.in", "outlook.com", "hotmail.com", "live.com", "icloud.com", "mail.ru", "proton.me", "protonmail.com"
+        );
+        return personalDomains.contains(domain);
     }
 
     private String generateUniqueReferenceId() {

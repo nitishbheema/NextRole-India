@@ -8,6 +8,7 @@ import com.nextrole.enums.ExperienceLevel;
 import com.nextrole.enums.JobType;
 import com.nextrole.enums.SubmissionStatus;
 import com.nextrole.enums.WorkMode;
+import com.nextrole.exception.GlobalExceptionHandler;
 import com.nextrole.exception.ResourceNotFoundException;
 import com.nextrole.service.EmployerJobService;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = EmployerJobController.class)
+@Import(GlobalExceptionHandler.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class EmployerJobControllerTest {
@@ -59,6 +62,7 @@ class EmployerJobControllerTest {
         request.setWorkMode(WorkMode.HYBRID);
         request.setApplyUrl("https://www.phonepe.com/careers/job-123");
         request.setAuthorizedConsent(true);
+        request.setDeadline(LocalDateTime.of(2026, 11, 30, 23, 59, 59));
 
         EmployerJobSubmissionResponse response = new EmployerJobSubmissionResponse(
                 "NR-2026-ABC123",
@@ -75,6 +79,86 @@ class EmployerJobControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.referenceId").value("NR-2026-ABC123"))
                 .andExpect(jsonPath("$.status").value("PENDING_VERIFICATION"));
+    }
+
+    @Test
+    @DisplayName("POST /api/employer/jobs with ISO deadline timestamp parses successfully")
+    void testSubmitJobWithIsoDeadline() throws Exception {
+        String jsonPayload = """
+                {
+                    "companyName": "Zomato",
+                    "companyWebsite": "https://zomato.com",
+                    "recruiterName": "Karan Mehra",
+                    "recruiterEmail": "karan@zomato.com",
+                    "jobTitle": "Data Platform Engineer",
+                    "jobDescription": "Kafka and Flink pipeline engineering",
+                    "location": "Gurugram, India",
+                    "country": "India",
+                    "jobType": "FULL_TIME",
+                    "experienceLevel": "MID",
+                    "workMode": "ONSITE",
+                    "applyUrl": "https://zomato.com/careers/data-101",
+                    "authorizedConsent": true,
+                    "deadline": "2026-11-30T00:00:00.000Z"
+                }
+                """;
+
+        EmployerJobSubmissionResponse response = new EmployerJobSubmissionResponse(
+                "NR-2026-ZOMATO",
+                SubmissionStatus.PENDING_VERIFICATION,
+                "Under verification",
+                LocalDateTime.now()
+        );
+
+        when(employerJobService.submitJob(any())).thenReturn(response);
+
+        mockMvc.perform(post("/api/employer/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonPayload))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.referenceId").value("NR-2026-ZOMATO"));
+    }
+
+    @Test
+    @DisplayName("POST /api/employer/jobs returns 400 Bad Request when disposable email rejected by service")
+    void testSubmitJobDisposableEmailReturnsBadRequest() throws Exception {
+        EmployerJobSubmissionRequest request = new EmployerJobSubmissionRequest();
+        request.setCompanyName("Test Co");
+        request.setCompanyWebsite("https://test.co");
+        request.setRecruiterName("Hacker");
+        request.setRecruiterEmail("hacker@tempmail.com");
+        request.setJobTitle("Engineer");
+        request.setJobDescription("Test Description");
+        request.setLocation("Bengaluru");
+        request.setJobType(JobType.FULL_TIME);
+        request.setExperienceLevel(ExperienceLevel.FRESHER);
+        request.setWorkMode(WorkMode.HYBRID);
+        request.setApplyUrl("https://test.co/apply");
+        request.setAuthorizedConsent(true);
+
+        when(employerJobService.submitJob(any()))
+                .thenThrow(new IllegalArgumentException("Disposable email addresses are not permitted. Please use your official company or professional email."));
+
+        mockMvc.perform(post("/api/employer/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Disposable email addresses are not permitted. Please use your official company or professional email."));
+    }
+
+    @Test
+    @DisplayName("POST /api/employer/jobs returns 400 when required fields are missing")
+    void testSubmitJobValidationFailure() throws Exception {
+        EmployerJobSubmissionRequest request = new EmployerJobSubmissionRequest();
+        // Missing companyName, recruiterEmail, applyUrl, etc.
+
+        mockMvc.perform(post("/api/employer/jobs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.companyName").exists())
+                .andExpect(jsonPath("$.errors.recruiterEmail").exists());
     }
 
     @Test

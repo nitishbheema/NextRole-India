@@ -7,6 +7,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,10 +21,22 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
+        List<String> patterns = new ArrayList<>();
         String origins = appProperties.getCors().getAllowedOrigins();
-        List<String> originList = Arrays.asList(origins.split(","));
-        config.setAllowedOrigins(originList.stream().map(String::trim).toList());
+        if (origins != null && !origins.isBlank()) {
+            for (String o : origins.split(",")) {
+                String trimmed = o.trim();
+                if (!trimmed.isEmpty()) {
+                    patterns.add(trimmed);
+                }
+            }
+        }
+        // Always permit Render hosted frontend subdomains and local dev origins
+        patterns.add("https://*.onrender.com");
+        patterns.add("http://localhost:[*]");
+        patterns.add("http://127.0.0.1:[*]");
 
+        config.setAllowedOriginPatterns(patterns);
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("X-CSRF-Token"));

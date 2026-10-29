@@ -1,5 +1,7 @@
 package com.nextrole.dto.employer;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.nextrole.config.LenientLocalDateTimeDeserializer;
 import com.nextrole.enums.ExperienceLevel;
 import com.nextrole.enums.JobType;
 import com.nextrole.enums.WorkMode;
@@ -63,6 +65,7 @@ public class EmployerJobSubmissionRequest {
 
     private String officialJobUrl;
 
+    @JsonDeserialize(using = LenientLocalDateTimeDeserializer.class)
     private LocalDateTime deadline;
 
     @NotNull(message = "Consent is required")

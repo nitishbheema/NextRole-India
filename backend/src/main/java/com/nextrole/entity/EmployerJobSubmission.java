@@ -116,8 +116,16 @@ public class EmployerJobSubmission {
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 
-    @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @OrderBy("createdAt DESC")
     @Builder.Default
     private List<SubmissionStatusHistory> statusHistory = new ArrayList<>();
+
+    public void addStatusHistory(SubmissionStatusHistory history) {
+        if (this.statusHistory == null) {
+            this.statusHistory = new ArrayList<>();
+        }
+        this.statusHistory.add(history);
+        history.setSubmission(this);
+    }
 }
