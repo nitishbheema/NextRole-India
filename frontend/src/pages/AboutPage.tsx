@@ -7,6 +7,9 @@ export default function AboutPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
       <div className="text-center mb-12">
+        <div className="mb-4 flex justify-center">
+          <img src="/logo.png" alt="NextRole India" className="h-12 w-auto object-contain" />
+        </div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e7f6ef] text-[#087f5b] text-[11px] font-bold tracking-wider uppercase mb-2">
           <Compass className="h-3.5 w-3.5" />
           Mission & Architecture

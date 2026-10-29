@@ -13,13 +13,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand & Purpose */}
           <div className="md:col-span-1 space-y-3">
-            <Link to="/" className="flex items-center gap-2.5 font-display font-extrabold text-xl text-white">
-              <div className="w-[30px] h-[30px] bg-[#087f5b] text-white rounded-[8px] flex items-center justify-center font-bold text-base">
-                N
-              </div>
-              <span className="tracking-tight">
-                nextrole<span className="text-[#d8f26a]">.india</span>
-              </span>
+            <Link to="/" className="inline-block transition-opacity hover:opacity-90" aria-label="NextRole India Home">
+              <img
+                src="/logo-white.png"
+                alt="NextRole India"
+                className="h-[34px] w-auto max-w-[200px] object-contain"
+              />
             </Link>
             <p className="text-xs text-[#a3b8af] leading-relaxed">
               Automated public job discovery platform for Indian IT freshers, internships, and tech professionals. Apply directly on official employer career pages.

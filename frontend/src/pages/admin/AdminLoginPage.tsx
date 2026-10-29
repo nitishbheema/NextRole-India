@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Lock, AlertCircle, Shield } from 'lucide-react';
 
@@ -47,6 +47,9 @@ export default function AdminLoginPage() {
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-6 bg-white p-8 border border-gray-200 rounded-xl shadow-sm">
         <div className="text-center">
+          <Link to="/" className="inline-block mb-4" aria-label="Back to NextRole Home">
+            <img src="/logo.png" alt="NextRole India" className="h-9 w-auto mx-auto object-contain" />
+          </Link>
           <div className="inline-flex items-center justify-center p-3 bg-brand-50 rounded-full text-brand-600 mb-3">
             <Lock className="h-6 w-6" />
           </div>

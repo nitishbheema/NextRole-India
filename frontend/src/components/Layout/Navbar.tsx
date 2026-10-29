@@ -36,13 +36,12 @@ export default function Navbar() {
         <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[68px]">
             {/* Brand Logo */}
-            <Link to="/" className="flex items-center gap-2.5 font-display font-extrabold text-[21px] tracking-tight text-[#172b25]">
-              <div className="w-[32px] h-[32px] bg-[#087f5b] text-white rounded-[9px] flex items-center justify-center font-bold text-lg shadow-sm">
-                N
-              </div>
-              <span className="tracking-tight">
-                nextrole<span className="text-[#087f5b]">.india</span>
-              </span>
+            <Link to="/" className="flex items-center gap-2.5 transition-transform hover:scale-[1.01]" aria-label="NextRole India Home">
+              <img
+                src="/logo.png"
+                alt="NextRole India"
+                className="h-[34px] sm:h-[38px] w-auto max-w-[210px] object-contain"
+              />
             </Link>
 
             {/* Desktop Navigation */}
