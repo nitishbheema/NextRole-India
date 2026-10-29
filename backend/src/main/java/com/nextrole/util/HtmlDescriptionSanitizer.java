@@ -142,6 +142,11 @@ public final class HtmlDescriptionSanitizer {
         return text;
     }
 
+    private static String escapeText(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
     /**
      * Converts plain text with paragraphs and list bullets into semantic HTML.
      */
@@ -162,7 +167,7 @@ public final class HtmlDescriptionSanitizer {
             if (!currentBullets.isEmpty()) {
                 html.append("<ul>\n");
                 for (String bullet : currentBullets) {
-                    html.append("  <li>").append(Parser.escapeEntities(bullet, OUTPUT_SETTINGS)).append("</li>\n");
+                    html.append("  <li>").append(escapeText(bullet)).append("</li>\n");
                 }
                 html.append("</ul>\n");
                 currentBullets.clear();
@@ -174,7 +179,7 @@ public final class HtmlDescriptionSanitizer {
                 html.append("<p>");
                 for (int i = 0; i < currentParagraph.size(); i++) {
                     if (i > 0) html.append("<br>");
-                    html.append(Parser.escapeEntities(currentParagraph.get(i), OUTPUT_SETTINGS));
+                    html.append(escapeText(currentParagraph.get(i)));
                 }
                 html.append("</p>\n");
                 currentParagraph.clear();
