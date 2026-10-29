@@ -36,6 +36,45 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+export function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/jobs" element={<JobsPage />} />
+      <Route path="/jobs/:id" element={<JobDetailPage />} />
+      <Route path="/companies" element={<CompaniesPage />} />
+      <Route path="/post-job" element={<PostJobPage />} />
+      <Route path="/submission-status" element={<SubmissionStatusPage />} />
+      <Route path="/submission-status/:ref" element={<SubmissionStatusPage />} />
+      <Route path="/about" element={<AboutPage />} />
+
+      {/* Admin routes */}
+      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute>
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/sources"
+        element={
+          <ProtectedRoute>
+            <AdminSourcesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 404 Fallback */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -43,40 +82,7 @@ export default function App() {
         <div className="min-h-screen flex flex-col bg-[#f7faf8] text-[#172b25] font-sans">
           <Navbar />
           <main className="flex-grow">
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/jobs" element={<JobsPage />} />
-              <Route path="/jobs/:id" element={<JobDetailPage />} />
-              <Route path="/companies" element={<CompaniesPage />} />
-              <Route path="/post-job" element={<PostJobPage />} />
-              <Route path="/submission-status" element={<SubmissionStatusPage />} />
-              <Route path="/submission-status/:ref" element={<SubmissionStatusPage />} />
-              <Route path="/about" element={<AboutPage />} />
-
-              {/* Admin routes */}
-              <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="/admin/login" element={<AdminLoginPage />} />
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <AdminDashboardPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/sources"
-                element={
-                  <ProtectedRoute>
-                    <AdminSourcesPage />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* 404 Fallback */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
+            <AppRoutes />
           </main>
           <Footer />
         </div>

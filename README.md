@@ -128,12 +128,25 @@ Refer to [`docs/free-tier-limitations.md`](file:///d:/Projects%20or%20Internship
    - `ADMIN_USERNAME`: Administrator username
    - `ADMIN_PASSWORD`: Strong password
 
-### Step 3: Render Static Site (Frontend)
-1. Create a Static Site from this repo with root directory `frontend`.
-2. Build command: `npm ci && npm run build`
-3. Publish directory: `dist`
-4. Set environment variable: `VITE_API_BASE_URL` = Your backend Render URL.
-5. SPA routing rewrite: `/* -> /index.html 200` (auto-configured via `public/_redirects`).
+### Step 3: Render Static Site (Frontend) & SPA Rewrite Rules
+NextRole India provides a root `render.yaml` Blueprint that automatically provisions both the backend Docker Web Service and frontend Static Site with SPA fallback routing.
+
+If configuring manually via the **Render Dashboard**:
+1. Create a **Static Site** from this repo with:
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm ci && npm run build`
+   - **Publish Directory**: `dist`
+2. Set Environment Variable:
+   - `VITE_API_BASE_URL`: Your backend Render URL (e.g., `https://nextrole-backend.onrender.com`).
+3. **Crucial for SPA Page Refresh (Prevents 404s)**:
+   - Go to your Static Site service in the Render Dashboard.
+   - Click on **Redirects/Rewrites** in the left sidebar menu.
+   - Click **Add Rule** and enter:
+     - **Source**: `/*`
+     - **Destination**: `/index.html`
+     - **Action**: `Rewrite` *(Do not use `Redirect`)*
+   - Save changes. This ensures direct links and page refreshes on `/jobs`, `/jobs/:id`, `/companies`, etc., correctly serve the React SPA index instead of returning `Not Found`.
+   *(Note: Render Static Sites do not read Netlify `_redirects` files; the rule must be configured either via `render.yaml` Blueprint or in the Render Dashboard).*
 
 ### Step 4: GitHub Actions Secrets for Scheduled Sync
 Set these repository secrets in GitHub (`Settings -> Secrets and variables -> Actions`):
