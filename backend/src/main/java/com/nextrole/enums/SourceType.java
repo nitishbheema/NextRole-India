@@ -3,5 +3,8 @@ package com.nextrole.enums;
 public enum SourceType {
     GREENHOUSE,
     LEVER,
-    ASHBY
+    ASHBY,
+    SMARTRECRUITERS,
+    WORKABLE,
+    UNSUPPORTED
 }

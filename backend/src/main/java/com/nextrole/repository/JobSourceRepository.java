@@ -15,6 +15,8 @@ public interface JobSourceRepository extends JpaRepository<JobSource, Long> {
 
     List<JobSource> findByCompanyId(Long companyId);
 
+    List<JobSource> findByCompanyIdAndSourceType(Long companyId, SourceType sourceType);
+
     @Query("SELECT js FROM JobSource js JOIN FETCH js.company WHERE js.enabled = true ORDER BY js.company.name")
     List<JobSource> findAllEnabledWithCompany();
 

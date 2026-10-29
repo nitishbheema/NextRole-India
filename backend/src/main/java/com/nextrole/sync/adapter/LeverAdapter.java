@@ -110,7 +110,7 @@ public class LeverAdapter implements JobSourceAdapter {
         return normalized;
     }
 
-    NormalizedJob normalizePosting(JsonNode node, String company) {
+    public NormalizedJob normalizePosting(JsonNode node, String company) {
         String id = node.path("id").asText("").trim();
         if (id.isBlank()) {
             return null;

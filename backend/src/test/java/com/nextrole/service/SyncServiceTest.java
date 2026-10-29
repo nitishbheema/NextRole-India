@@ -95,11 +95,11 @@ class SyncServiceTest {
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(newJob));
         when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of());
 
-        JobSyncOrchestrator.SourceSyncResult result = orchestrator.syncSource(testSource);
+        SyncRun result = orchestrator.syncSource(testSource);
 
-        assertThat(result.created()).isEqualTo(1);
-        assertThat(result.updated()).isEqualTo(0);
-        assertThat(result.expired()).isEqualTo(0);
+        assertThat(result.getJobsCreated()).isEqualTo(1);
+        assertThat(result.getJobsUpdated()).isEqualTo(0);
+        assertThat(result.getJobsExpired()).isEqualTo(0);
         verify(jobRepository, times(1)).save(argThat(j ->
                 j.getSourceJobId().equals("job-1") &&
                 j.getStatus() == JobStatus.ACTIVE &&
@@ -142,9 +142,9 @@ class SyncServiceTest {
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(updatedJob));
         when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of(existingJob));
 
-        JobSyncOrchestrator.SourceSyncResult result = orchestrator.syncSource(testSource);
+        SyncRun result = orchestrator.syncSource(testSource);
 
-        assertThat(result.updated()).isEqualTo(1);
+        assertThat(result.getJobsUpdated()).isEqualTo(1);
         assertThat(existingJob.getTitle()).isEqualTo("Updated Senior Title");
         assertThat(existingJob.getStatus()).isEqualTo(JobStatus.ACTIVE); // restored from NEEDS_RECHECK
         assertThat(existingJob.getMissingFromSourceCount()).isEqualTo(0); // reset
@@ -182,9 +182,9 @@ class SyncServiceTest {
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(closedJob));
         when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of(existingJob));
 
-        JobSyncOrchestrator.SourceSyncResult result = orchestrator.syncSource(testSource);
+        SyncRun result = orchestrator.syncSource(testSource);
 
-        assertThat(result.expired()).isEqualTo(1);
+        assertThat(result.getJobsExpired()).isEqualTo(1);
         assertThat(existingJob.getStatus()).isEqualTo(JobStatus.EXPIRED);
         assertThat(existingJob.getExpiredReason()).contains("explicitly closed");
         assertThat(existingJob.getExpiredAt()).isNotNull();
@@ -238,10 +238,10 @@ class SyncServiceTest {
         // Adapter throws network/timeout exception
         when(mockAdapter.fetchJobs(testSource)).thenThrow(new RuntimeException("Connection timed out"));
 
-        JobSyncOrchestrator.SourceSyncResult result = orchestrator.syncSource(testSource);
+        SyncRun result = orchestrator.syncSource(testSource);
 
         // Should report 0 expired
-        assertThat(result.expired()).isEqualTo(0);
+        assertThat(result.getJobsExpired()).isEqualTo(0);
         // Active job must remain untouched (still ACTIVE, count still 0)
         assertThat(activeJob.getStatus()).isEqualTo(JobStatus.ACTIVE);
         assertThat(activeJob.getMissingFromSourceCount()).isEqualTo(0);

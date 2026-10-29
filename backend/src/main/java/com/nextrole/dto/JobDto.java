@@ -15,5 +15,15 @@ public record JobDto(
         String applyUrl,
         LocalDateTime publishedAt,
         LocalDateTime lastVerifiedAt,
-        LocalDateTime firstSeenAt
-) {}
+        LocalDateTime firstSeenAt,
+        boolean isEmployerSubmitted
+) {
+    public JobDto(Long id, String title, String companyName, String companyLogoUrl,
+                  String location, String country, String jobType, String experienceLevel,
+                  String workMode, String applyUrl, LocalDateTime publishedAt,
+                  LocalDateTime lastVerifiedAt, LocalDateTime firstSeenAt) {
+        this(id, title, companyName, companyLogoUrl, location, country, jobType,
+                experienceLevel, workMode, applyUrl, publishedAt, lastVerifiedAt,
+                firstSeenAt, false);
+    }
+}

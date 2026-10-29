@@ -36,6 +36,8 @@ class AdminControllerTest {
     private CompanyService companyService;
     @MockBean
     private SyncService syncService;
+    @MockBean
+    private com.nextrole.service.EmployerJobService employerJobService;
 
     @Test
     @DisplayName("Unauthenticated visitor cannot access admin endpoints (401 Unauthorized)")

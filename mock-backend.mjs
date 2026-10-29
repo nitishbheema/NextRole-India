@@ -145,6 +145,32 @@ let seedSyncRuns = [
   { id: 103, sourceId: 3, companyName: 'Freshworks', sourceType: 'GREENHOUSE', boardIdentifier: 'freshworks', startedAt: new Date(Date.now() - 1000 * 60 * 43).toISOString(), completedAt: new Date(Date.now() - 1000 * 60 * 42).toISOString(), status: 'SUCCESS', jobsFound: 21, jobsCreated: 3, jobsUpdated: 18, jobsExpired: 1 }
 ];
 
+let seedSubmissions = [
+  {
+    id: 1,
+    referenceId: 'NR-2026-DEMO01',
+    companyName: 'Groww',
+    companyWebsite: 'https://groww.in',
+    recruiterName: 'Amit Verma',
+    recruiterEmail: 'amit.verma@groww.in',
+    jobTitle: 'Frontend Engineer (React)',
+    jobDescription: 'Build modern financial apps using React and TypeScript.',
+    location: 'Bengaluru, India',
+    country: 'India',
+    jobType: 'FULL_TIME',
+    experienceLevel: 'FRESHER',
+    workMode: 'HYBRID',
+    salaryRange: '₹8 - 14 LPA',
+    applyUrl: 'https://groww.in/p/careers',
+    status: 'PENDING_VERIFICATION',
+    riskLabel: 'LOW_RISK',
+    threatScore: 0,
+    riskDetails: '{"flags":[],"source":"NextRole SSRF & PhishSense Guard"}',
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+    statusHistory: []
+  }
+];
+
 let currentUser = null;
 
 const server = http.createServer((req, res) => {
@@ -399,6 +425,155 @@ const server = http.createServer((req, res) => {
         jobsExpired: 0
       });
       return sendJson(200, { status: 'STARTED', message: 'Synchronization triggered successfully.' });
+    }
+
+    // Employer Job Submission
+    if (pathname === '/api/employer/jobs' && method === 'POST') {
+      const refId = 'NR-2026-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const newSub = {
+        id: seedSubmissions.length + 1,
+        referenceId: refId,
+        companyName: jsonBody.companyName,
+        companyWebsite: jsonBody.companyWebsite,
+        recruiterName: jsonBody.recruiterName,
+        recruiterEmail: jsonBody.recruiterEmail,
+        jobTitle: jsonBody.jobTitle,
+        jobDescription: jsonBody.jobDescription,
+        location: jsonBody.location,
+        country: jsonBody.country || 'India',
+        jobType: jsonBody.jobType,
+        experienceLevel: jsonBody.experienceLevel,
+        workMode: jsonBody.workMode,
+        salaryRange: jsonBody.salaryRange,
+        applyUrl: jsonBody.applyUrl,
+        officialJobUrl: jsonBody.officialJobUrl,
+        status: 'PENDING_VERIFICATION',
+        riskLabel: 'LOW_RISK',
+        threatScore: 0,
+        riskDetails: '{"flags":[],"source":"NextRole SSRF & PhishSense Guard"}',
+        createdAt: new Date().toISOString(),
+        statusHistory: []
+      };
+      seedSubmissions.unshift(newSub);
+      return sendJson(201, {
+        referenceId: refId,
+        status: 'PENDING_VERIFICATION',
+        message: 'Your job posting has been submitted and is under verification. Our team will review the company details and application link before publishing it. You will be notified when a decision is made.',
+        submittedAt: newSub.createdAt
+      });
+    }
+
+    // Employer Submission Status
+    if (pathname.startsWith('/api/employer/jobs/status/') && method === 'GET') {
+      const refId = decodeURIComponent(pathname.split('/')[5] || '');
+      const sub = seedSubmissions.find(s => s.referenceId.toUpperCase() === refId.toUpperCase());
+      if (sub) {
+        return sendJson(200, {
+          referenceId: sub.referenceId,
+          companyName: sub.companyName,
+          jobTitle: sub.jobTitle,
+          status: sub.status,
+          submittedAt: sub.createdAt,
+          updatedAt: sub.updatedAt || sub.createdAt
+        });
+      }
+      return sendJson(404, { message: `Submission not found for reference ID: ${refId}` });
+    }
+
+    // Admin Submissions List
+    if (pathname === '/api/admin/submissions' && method === 'GET') {
+      let filtered = [...seedSubmissions];
+      if (parsedUrl.query.status && parsedUrl.query.status !== 'ALL') {
+        filtered = filtered.filter(s => s.status === parsedUrl.query.status);
+      }
+      return sendJson(200, {
+        content: filtered,
+        page: 0,
+        size: 20,
+        totalElements: filtered.length,
+        totalPages: 1
+      });
+    }
+
+    // Admin Approve Submission
+    if (pathname.match(/^\/api\/admin\/submissions\/\d+\/approve$/) && method === 'POST') {
+      const id = parseInt(pathname.split('/')[4], 10);
+      const sub = seedSubmissions.find(s => s.id === id);
+      if (sub) {
+        sub.status = 'APPROVED';
+        sub.reviewedAt = new Date().toISOString();
+        sub.reviewerNotes = jsonBody.notes || 'Approved by administrator';
+        // Add to active jobs
+        seedJobs.unshift({
+          id: seedJobs.length + 1,
+          title: sub.jobTitle,
+          companyName: sub.companyName,
+          companyLogoUrl: null,
+          location: sub.location,
+          country: sub.country,
+          jobType: sub.jobType,
+          experienceLevel: sub.experienceLevel,
+          workMode: sub.workMode,
+          applyUrl: sub.applyUrl,
+          publishedAt: new Date().toISOString(),
+          lastVerifiedAt: new Date().toISOString(),
+          firstSeenAt: new Date().toISOString(),
+          description: sub.jobDescription,
+          sourceType: 'EMPLOYER_DIRECT',
+          isEmployerSubmitted: true,
+          status: 'ACTIVE'
+        });
+        return sendJson(200, sub);
+      }
+      return sendJson(404, { message: 'Submission not found' });
+    }
+
+    // Admin Reject Submission
+    if (pathname.match(/^\/api\/admin\/submissions\/\d+\/reject$/) && method === 'POST') {
+      const id = parseInt(pathname.split('/')[4], 10);
+      const sub = seedSubmissions.find(s => s.id === id);
+      if (sub) {
+        sub.status = 'REJECTED';
+        sub.reviewedAt = new Date().toISOString();
+        sub.reviewerNotes = jsonBody.notes;
+        return sendJson(200, sub);
+      }
+      return sendJson(404, { message: 'Submission not found' });
+    }
+
+    // Admin Request Changes
+    if (pathname.match(/^\/api\/admin\/submissions\/\d+\/request-changes$/) && method === 'POST') {
+      const id = parseInt(pathname.split('/')[4], 10);
+      const sub = seedSubmissions.find(s => s.id === id);
+      if (sub) {
+        sub.status = 'NEEDS_CHANGES';
+        sub.reviewerNotes = jsonBody.notes;
+        return sendJson(200, sub);
+      }
+      return sendJson(404, { message: 'Submission not found' });
+    }
+
+    // Admin Rescan Submission
+    if (pathname.match(/^\/api\/admin\/submissions\/\d+\/rescan$/) && method === 'POST') {
+      const id = parseInt(pathname.split('/')[4], 10);
+      const sub = seedSubmissions.find(s => s.id === id);
+      if (sub) {
+        sub.threatScore = 0;
+        sub.riskLabel = 'LOW_RISK';
+        return sendJson(200, sub);
+      }
+      return sendJson(404, { message: 'Submission not found' });
+    }
+
+    // Admin CSV Import
+    if (pathname === '/api/admin/sources/import-csv' && method === 'POST') {
+      const csv = jsonBody.csvData || '';
+      const lines = csv.split('\n').filter(l => l.trim());
+      return sendJson(200, {
+        imported: lines.length,
+        skipped: 0,
+        errors: []
+      });
     }
 
     // Default 404

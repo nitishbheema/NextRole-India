@@ -112,7 +112,7 @@ public class GreenhouseAdapter implements JobSourceAdapter {
         return normalized;
     }
 
-    NormalizedJob normalizeJob(JsonNode node) {
+    public NormalizedJob normalizeJob(JsonNode node) {
         String id = node.path("id").asText();
         if (id.isBlank()) {
             return null;

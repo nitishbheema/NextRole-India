@@ -55,8 +55,8 @@ class JobControllerTest {
                         .param("q", "Software")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").isEqualTo("Software Engineer"))
-                .andExpect(jsonPath("$.totalElements").isEqualTo(1));
+                .andExpect(jsonPath("$.content[0].title").value("Software Engineer"))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -85,7 +85,7 @@ class JobControllerTest {
 
         mockMvc.perform(get("/api/jobs/fresher"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").isEqualTo("Associate Developer"))
-                .andExpect(jsonPath("$[0].experienceLevel").isEqualTo("FRESHER"));
+                .andExpect(jsonPath("$[0].title").value("Associate Developer"))
+                .andExpect(jsonPath("$[0].experienceLevel").value("FRESHER"));
     }
 }

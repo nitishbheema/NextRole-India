@@ -2,10 +2,8 @@ name: Sync Jobs
 
 on:
   schedule:
-    # Runs at 17 minutes past 0,6,12,18 UTC
-    # Approx 5:47 AM, 11:47 AM, 5:47 PM, 11:47 PM IST
-    # Note: GitHub Actions schedules can be delayed by up to several minutes
-    - cron: '17 0,6,12,18 * * *'
+    # Runs hourly (every 60 minutes) at minute 0
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       debug_logging:

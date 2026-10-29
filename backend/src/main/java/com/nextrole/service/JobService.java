@@ -8,12 +8,14 @@ import com.nextrole.entity.Job;
 import com.nextrole.enums.JobStatus;
 import com.nextrole.exception.ResourceNotFoundException;
 import com.nextrole.repository.JobRepository;
+import com.nextrole.repository.JobSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,26 +45,8 @@ public class JobService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        String keyword = request.getQ();
-        if (keyword != null && keyword.trim().isEmpty()) {
-            keyword = null;
-        }
-
-        String location = request.getLocation();
-        if (location != null && location.trim().isEmpty()) {
-            location = null;
-        }
-
-        Page<Job> jobPage = jobRepository.findWithFilters(
-                JobStatus.ACTIVE,
-                keyword,
-                request.getCompany(),
-                location,
-                request.getJobType(),
-                request.getExperienceLevel(),
-                request.getWorkMode(),
-                pageable
-        );
+        Specification<Job> spec = JobSpecification.withFilters(request);
+        Page<Job> jobPage = jobRepository.findAll(spec, pageable);
 
         List<JobDto> dtoList = jobPage.getContent().stream()
                 .map(this::toJobDto)
@@ -130,7 +114,8 @@ public class JobService {
                 job.getApplyUrl(),
                 job.getPublishedAt(),
                 job.getLastVerifiedAt(),
-                job.getFirstSeenAt()
+                job.getFirstSeenAt(),
+                job.isEmployerSubmitted()
         );
     }
 

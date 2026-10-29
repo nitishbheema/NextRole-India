@@ -161,6 +161,11 @@ export default function JobCard(props: Props) {
 
       {/* Badges */}
       <div className="flex flex-wrap gap-1.5">
+        {job.isEmployerSubmitted && (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Direct Employer Verified
+          </span>
+        )}
         {job.jobType && (
           <span
             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

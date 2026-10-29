@@ -76,14 +76,15 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                 .csrfTokenRepository(csrfTokenRepository)
                 .csrfTokenRequestHandler(csrfHandler)
-                .ignoringRequestMatchers("/api/admin/auth/login", "/api/admin/auth/logout")
+                .ignoringRequestMatchers("/api/admin/auth/login", "/api/admin/auth/logout", "/api/employer/**")
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "GET", "/api/jobs/**",
+                    "/api/jobs/**",
                     "/api/companies/**",
                     "/api/job-categories",
                     "/api/sources/public",
+                    "/api/employer/**",
                     "/api/health",
                     "/actuator/health",
                     "/actuator/info"

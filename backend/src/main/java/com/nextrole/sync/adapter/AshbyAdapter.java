@@ -135,7 +135,7 @@ public class AshbyAdapter implements JobSourceAdapter {
         return normalized;
     }
 
-    NormalizedJob normalizePosting(JsonNode node, String boardIdentifier) {
+    public NormalizedJob normalizePosting(JsonNode node, String boardIdentifier) {
         // Skip unlisted jobs
         boolean isListed = node.path("isListed").asBoolean(true);
         if (!isListed) {

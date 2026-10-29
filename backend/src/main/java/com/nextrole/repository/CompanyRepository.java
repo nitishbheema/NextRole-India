@@ -13,6 +13,8 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     Optional<Company> findByName(String name);
 
+    Optional<Company> findByNameIgnoreCase(String name);
+
     @Query("SELECT DISTINCT c FROM Company c JOIN c.jobSources js WHERE js.enabled = true ORDER BY c.name")
     List<Company> findCompaniesWithEnabledSources();
 }

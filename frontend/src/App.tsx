@@ -9,6 +9,8 @@ import JobsPage from './pages/JobsPage';
 import JobDetailPage from './pages/JobDetailPage';
 import CompaniesPage from './pages/CompaniesPage';
 import AboutPage from './pages/AboutPage';
+import PostJobPage from './pages/PostJobPage';
+import SubmissionStatusPage from './pages/SubmissionStatusPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 import AdminLoginPage from './pages/admin/AdminLoginPage';
@@ -47,6 +49,9 @@ export default function App() {
               <Route path="/jobs" element={<JobsPage />} />
               <Route path="/jobs/:id" element={<JobDetailPage />} />
               <Route path="/companies" element={<CompaniesPage />} />
+              <Route path="/post-job" element={<PostJobPage />} />
+              <Route path="/submission-status" element={<SubmissionStatusPage />} />
+              <Route path="/submission-status/:ref" element={<SubmissionStatusPage />} />
               <Route path="/about" element={<AboutPage />} />
 
               {/* Admin routes */}

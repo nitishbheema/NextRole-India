@@ -1,6 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from './api';
-import type { Job, JobDetail, JobFilters, PagedResponse, Company, AdminStats, JobSource, PublicSourcesResponse } from './types';
+import type {
+  Job,
+  JobDetail,
+  JobFilters,
+  PagedResponse,
+  Company,
+  AdminStats,
+  JobSource,
+  PublicSourcesResponse,
+  SubmissionStatusResponse,
+  AdminSubmission,
+  SubmissionStatus
+} from './types';
 
 // ------------------------------------------------------------------
 // useDebounce
@@ -220,4 +232,68 @@ export function useAdminSources() {
   }, [fetchSources]);
 
   return { data, loading, error, refetch: fetchSources };
+}
+
+// ------------------------------------------------------------------
+// useSubmissionStatus
+// ------------------------------------------------------------------
+export function useSubmissionStatus(referenceId: string) {
+  const [data, setData] = useState<SubmissionStatusResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStatus = useCallback(async () => {
+    if (!referenceId.trim()) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get<SubmissionStatusResponse>(`/api/employer/jobs/status/${encodeURIComponent(referenceId.trim())}`);
+      setData(res.data);
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message || err?.message || 'Could not find submission');
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [referenceId]);
+
+  useEffect(() => {
+    if (referenceId.trim()) {
+      fetchStatus();
+    }
+  }, [fetchStatus, referenceId]);
+
+  return { data, loading, error, refetch: fetchStatus };
+}
+
+// ------------------------------------------------------------------
+// useAdminSubmissions
+// ------------------------------------------------------------------
+export function useAdminSubmissions(status?: SubmissionStatus, page: number = 0) {
+  const [data, setData] = useState<PagedResponse<AdminSubmission> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSubmissions = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params: Record<string, string | number> = { page, size: 20 };
+      if (status) params.status = status;
+      const res = await api.get<PagedResponse<AdminSubmission>>('/api/admin/submissions', { params });
+      setData(res.data);
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      setError(err?.message || 'Failed to load submissions');
+    } finally {
+      setLoading(false);
+    }
+  }, [status, page]);
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
+
+  return { data, loading, error, refetch: fetchSubmissions };
 }

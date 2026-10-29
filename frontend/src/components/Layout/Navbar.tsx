@@ -8,6 +8,7 @@ export default function Navbar() {
   const navLinks = [
     { to: '/jobs', label: 'Jobs' },
     { to: '/companies', label: 'Companies' },
+    { to: '/submission-status', label: 'Track Submission' },
     { to: '/about', label: 'About' },
   ];
 
@@ -23,23 +24,32 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) =>
-                  `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-brand-50 text-brand-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
+          <div className="hidden md:flex items-center gap-2">
+            <nav className="flex items-center gap-1" aria-label="Main navigation">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-brand-50 text-brand-700'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </nav>
+
+            <Link
+              to="/post-job"
+              className="ml-3 px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-semibold transition shadow-xs flex items-center gap-1.5"
+            >
+              Post a Job
+            </Link>
+          </div>
 
           {/* Mobile hamburger */}
           <button
@@ -74,6 +84,13 @@ export default function Navbar() {
                 {link.label}
               </NavLink>
             ))}
+            <Link
+              to="/post-job"
+              onClick={() => setMobileOpen(false)}
+              className="mt-2 block px-4 py-2.5 bg-brand-600 text-white font-semibold rounded-lg text-sm text-center shadow-xs"
+            >
+              Post a Job
+            </Link>
           </nav>
         </div>
       )}

@@ -27,6 +27,10 @@ app:
     http-timeout-seconds: 5
     read-timeout-seconds: 5
 
+phishsense:
+  base-url: "http://127.0.0.1:54321"
+  api-key: ""
+
 logging:
   level:
     com.nextrole: INFO

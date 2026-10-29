@@ -39,6 +39,10 @@ app:
     max-retries: 3
     retry-delay-ms: 2000
 
+phishsense:
+  base-url: ${PHISHSENSE_BASE_URL:https://phishense-backend.onrender.com}
+  api-key: ${PHISHSENSE_API_KEY:}
+
 management:
   endpoints:
     web:

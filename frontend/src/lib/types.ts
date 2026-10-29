@@ -12,6 +12,7 @@ export interface Job {
   publishedAt?: string;
   lastVerifiedAt?: string;
   firstSeenAt?: string;
+  isEmployerSubmitted?: boolean;
 }
 
 export interface JobDetail extends Job {
@@ -123,4 +124,89 @@ export interface JobSource {
   lastAttemptedAt?: string;
   lastSuccessfulAt?: string;
   lastError?: string;
+}
+
+export type SubmissionStatus =
+  | 'PENDING_VERIFICATION'
+  | 'UNDER_REVIEW'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'NEEDS_CHANGES'
+  | 'FLAGGED_FOR_SECURITY_REVIEW';
+
+export type RiskLabel = 'LOW_RISK' | 'SUSPICIOUS' | 'MALICIOUS' | 'UNAVAILABLE' | 'UNKNOWN';
+
+export interface EmployerJobSubmissionRequest {
+  companyName: string;
+  companyWebsite: string;
+  recruiterName: string;
+  recruiterEmail: string;
+  jobTitle: string;
+  jobDescription: string;
+  location: string;
+  country?: string;
+  jobType: string;
+  experienceLevel: string;
+  workMode: string;
+  salaryRange?: string;
+  applyUrl: string;
+  officialJobUrl?: string;
+  deadline?: string;
+  authorizedConsent: boolean;
+}
+
+export interface EmployerJobSubmissionResponse {
+  referenceId: string;
+  status: SubmissionStatus;
+  message: string;
+  submittedAt: string;
+}
+
+export interface SubmissionStatusResponse {
+  referenceId: string;
+  companyName: string;
+  jobTitle: string;
+  status: SubmissionStatus;
+  submittedAt: string;
+  updatedAt: string;
+}
+
+export interface StatusHistoryItem {
+  id: number;
+  fromStatus?: SubmissionStatus;
+  toStatus: SubmissionStatus;
+  notes?: string;
+  changedBy?: string;
+  createdAt: string;
+}
+
+export interface AdminSubmission {
+  id: number;
+  referenceId: string;
+  companyName: string;
+  companyWebsite: string;
+  recruiterName: string;
+  recruiterEmail: string;
+  jobTitle: string;
+  jobDescription: string;
+  location: string;
+  country: string;
+  jobType: string;
+  experienceLevel: string;
+  workMode: string;
+  salaryRange?: string;
+  applyUrl: string;
+  officialJobUrl?: string;
+  deadline?: string;
+  status: SubmissionStatus;
+  riskLabel: RiskLabel;
+  threatScore: number;
+  riskDetails?: string;
+  reviewerNotes?: string;
+  reviewerUsername?: string;
+  publishedJobId?: number;
+  createdAt: string;
+  updatedAt: string;
+  reviewedAt?: string;
+  statusHistory: StatusHistoryItem[];
 }

@@ -7,7 +7,10 @@ import com.nextrole.enums.JobType;
 import com.nextrole.enums.WorkMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,7 +21,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface JobRepository extends JpaRepository<Job, Long> {
+public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
+
+    @Override
+    @EntityGraph(attributePaths = {"company", "source"})
+    Page<Job> findAll(Specification<Job> spec, Pageable pageable);
 
     Optional<Job> findBySourceIdAndSourceJobId(Long sourceId, String sourceJobId);
 

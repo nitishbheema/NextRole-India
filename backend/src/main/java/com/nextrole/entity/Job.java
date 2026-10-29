@@ -106,6 +106,10 @@ public class Job {
     @Column(name = "expired_reason", length = 512)
     private String expiredReason;
 
+    @Builder.Default
+    @Column(name = "is_employer_submitted", nullable = false)
+    private boolean isEmployerSubmitted = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
