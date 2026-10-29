@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, MapPin, Globe, SlidersHorizontal } from 'lucide-react';
 import { useDebounce } from '../lib/hooks';
 import type { JobFilters } from '../lib/types';
 
@@ -10,7 +10,7 @@ interface SearchBarProps {
 }
 
 const JOB_TYPES = [
-  { value: '', label: 'All Types' },
+  { value: '', label: 'All Job Types' },
   { value: 'FULL_TIME', label: 'Full Time' },
   { value: 'PART_TIME', label: 'Part Time' },
   { value: 'INTERNSHIP', label: 'Internship' },
@@ -20,17 +20,17 @@ const JOB_TYPES = [
 ];
 
 const EXP_LEVELS = [
-  { value: '', label: 'All Levels' },
-  { value: 'FRESHER', label: 'Fresher' },
-  { value: 'JUNIOR', label: 'Junior' },
-  { value: 'MID', label: 'Mid-Level' },
-  { value: 'SENIOR', label: 'Senior' },
-  { value: 'LEAD', label: 'Lead' },
+  { value: '', label: 'All Experience' },
+  { value: 'FRESHER', label: 'Fresher (0-1 yrs)' },
+  { value: 'JUNIOR', label: 'Junior (1-3 yrs)' },
+  { value: 'MID', label: 'Mid-Level (3-5 yrs)' },
+  { value: 'SENIOR', label: 'Senior (5+ yrs)' },
+  { value: 'LEAD', label: 'Lead / Staff' },
   { value: 'EXECUTIVE', label: 'Executive' },
 ];
 
 const WORK_MODES = [
-  { value: '', label: 'All Modes' },
+  { value: '', label: 'All Work Modes' },
   { value: 'REMOTE', label: 'Remote' },
   { value: 'HYBRID', label: 'Hybrid' },
   { value: 'ONSITE', label: 'On-site' },
@@ -38,7 +38,7 @@ const WORK_MODES = [
 
 const COUNTRY_OPTIONS = [
   { value: '', label: '🇮🇳 India (Default)' },
-  { value: 'ALL', label: '🌐 All / Global' },
+  { value: 'ALL', label: '🌐 All Countries' },
 ];
 
 export default function SearchBar({ filters, onChange, onClear }: SearchBarProps) {
@@ -74,40 +74,53 @@ export default function SearchBar({ filters, onChange, onClear }: SearchBarProps
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm space-y-3">
-      {/* Search input */}
-      <div className="relative">
-        <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-          aria-hidden="true"
-        />
-        <input
-          type="search"
-          placeholder="Search jobs, companies, keywords…"
-          value={localQ}
-          onChange={(e) => setLocalQ(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder-gray-400"
-          aria-label="Search jobs"
-        />
+    <div className="bg-white rounded-2xl border border-[#dce7e1] p-4 sm:p-5 shadow-[0_4px_20px_rgba(18,65,48,0.04)] space-y-3.5">
+      {/* Search Input Row */}
+      <div className="flex flex-col sm:flex-row gap-2.5">
+        <div className="relative flex-1">
+          <Search
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#087f5b]"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            placeholder="Search by role title, tech stack (e.g. Java, React), or company…"
+            value={localQ}
+            onChange={(e) => setLocalQ(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#dce7e1] text-xs sm:text-sm text-[#172b25] placeholder-[#8ea197] focus:outline-none focus:border-[#087f5b] focus:ring-2 focus:ring-[#087f5b]/20 bg-[#fafcfb]"
+            aria-label="Search jobs"
+          />
+        </div>
+
+        {/* Location input */}
+        <div className="relative sm:w-64">
+          <MapPin
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#087f5b]"
+            aria-hidden="true"
+          />
+          <input
+            type="text"
+            placeholder="City (Bengaluru, Remote…)"
+            value={filters.location ?? ''}
+            onChange={(e) => onChange({ location: e.target.value || undefined, page: 0 })}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#dce7e1] text-xs sm:text-sm text-[#172b25] placeholder-[#8ea197] focus:outline-none focus:border-[#087f5b] focus:ring-2 focus:ring-[#087f5b]/20 bg-[#fafcfb]"
+            aria-label="Filter by location"
+          />
+        </div>
       </div>
 
-      {/* Filters row */}
-      <div className="flex flex-wrap gap-2">
-        {/* Location */}
-        <input
-          type="text"
-          placeholder="Location (e.g. Bengaluru)"
-          value={filters.location ?? ''}
-          onChange={(e) => onChange({ location: e.target.value || undefined, page: 0 })}
-          className="flex-1 min-w-[140px] px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder-gray-400"
-          aria-label="Filter by location"
-        />
+      {/* Select Filters Row */}
+      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#edf3f0]">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-[#62756d] mr-1 hidden sm:flex">
+          <SlidersHorizontal className="w-3.5 h-3.5 text-[#087f5b]" />
+          <span>Filters:</span>
+        </div>
 
         {/* Job Type */}
         <select
           value={filters.jobType ?? ''}
           onChange={(e) => onChange({ jobType: e.target.value || undefined, page: 0 })}
-          className="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white"
+          className="px-3 py-1.5 rounded-xl border border-[#dce7e1] text-xs font-medium text-[#2d4037] focus:outline-none focus:border-[#087f5b] bg-[#fafcfb] cursor-pointer"
           aria-label="Filter by job type"
         >
           {JOB_TYPES.map((t) => (
@@ -121,7 +134,7 @@ export default function SearchBar({ filters, onChange, onClear }: SearchBarProps
         <select
           value={filters.experienceLevel ?? ''}
           onChange={(e) => onChange({ experienceLevel: e.target.value || undefined, page: 0 })}
-          className="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white"
+          className="px-3 py-1.5 rounded-xl border border-[#dce7e1] text-xs font-medium text-[#2d4037] focus:outline-none focus:border-[#087f5b] bg-[#fafcfb] cursor-pointer"
           aria-label="Filter by experience level"
         >
           {EXP_LEVELS.map((l) => (
@@ -135,7 +148,7 @@ export default function SearchBar({ filters, onChange, onClear }: SearchBarProps
         <select
           value={filters.workMode ?? ''}
           onChange={(e) => onChange({ workMode: e.target.value || undefined, page: 0 })}
-          className="px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-white"
+          className="px-3 py-1.5 rounded-xl border border-[#dce7e1] text-xs font-medium text-[#2d4037] focus:outline-none focus:border-[#087f5b] bg-[#fafcfb] cursor-pointer"
           aria-label="Filter by work mode"
         >
           {WORK_MODES.map((m) => (
@@ -149,7 +162,7 @@ export default function SearchBar({ filters, onChange, onClear }: SearchBarProps
         <select
           value={filters.country ?? ''}
           onChange={(e) => onChange({ country: e.target.value || undefined, page: 0 })}
-          className="px-3 py-2 rounded-xl border border-brand-200 text-sm font-medium text-brand-700 bg-brand-50/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          className="px-3 py-1.5 rounded-xl border border-[#cbe4d4] text-xs font-bold text-[#087f5b] bg-[#eef8f2] focus:outline-none focus:border-[#087f5b] cursor-pointer"
           aria-label="Filter by country"
         >
           {COUNTRY_OPTIONS.map((c) => (
@@ -159,16 +172,16 @@ export default function SearchBar({ filters, onChange, onClear }: SearchBarProps
           ))}
         </select>
 
-        {/* Clear */}
+        {/* Clear Filters */}
         {hasActiveFilters && (
           <button
             type="button"
             onClick={handleClear}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 text-sm text-red-600 hover:bg-red-50 transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-rose-200 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors ml-auto"
             aria-label="Clear all filters"
           >
             <X className="h-3.5 w-3.5" aria-hidden="true" />
-            Clear
+            Clear Filters
           </button>
         )}
       </div>

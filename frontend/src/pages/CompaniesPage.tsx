@@ -9,8 +9,6 @@ import {
   CheckCircle,
   Clock,
   Link2,
-  Building2,
-  Filter,
   X,
   ArrowRight,
   ShieldCheck,
@@ -68,23 +66,23 @@ export default function CompaniesPage() {
     switch (status) {
       case 'ACTIVE_IMPORT':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <CheckCircle className="h-3 w-3 text-emerald-600" />
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#e5f5ec] text-[#087f5b] border border-[#c2e7d1]">
+            <CheckCircle className="h-3 w-3 text-[#087f5b]" />
             Automated Feed
           </span>
         );
       case 'NEEDS_VERIFICATION':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-            <Clock className="h-3 w-3 text-amber-600" />
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[#fef7eb] text-[#b36b00] border border-[#fae2be]">
+            <Clock className="h-3 w-3 text-[#b36b00]" />
             Under Review
           </span>
         );
       case 'LINK_ONLY':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            <Link2 className="h-3 w-3 text-slate-500" />
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-[#f4f7f5] text-[#556960] border border-[#e1ebe6]">
+            <Link2 className="h-3 w-3 text-[#798e83]" />
             Link Only
           </span>
         );
@@ -92,19 +90,19 @@ export default function CompaniesPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header Section */}
       <div className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-gray-200">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-[#e1ebe6]">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-600 mb-1">
-              <Compass className="h-4 w-4" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e7f6ef] text-[#087f5b] text-[11px] font-bold tracking-wider uppercase mb-2">
+              <Compass className="h-3.5 w-3.5" />
               Benchmark Employers Directory
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+            <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#172b25] tracking-tight">
               100 Target Companies & ATS Registry
             </h1>
-            <p className="text-gray-500 mt-1 text-sm sm:text-base max-w-3xl leading-relaxed">
+            <p className="text-[#64776e] mt-2 text-xs sm:text-sm max-w-3xl leading-relaxed">
               Explore the complete 100-company registry across IT Services, Cloud, Startups, and Tech Engineering.
               We query official ATS endpoints where machine-readable feeds exist, and provide verified official career portal links for link-only portals.
             </p>
@@ -112,14 +110,14 @@ export default function CompaniesPage() {
 
           {/* Registry Stats Pills */}
           {data && (
-            <div className="flex flex-wrap gap-2 shrink-0 text-xs font-medium">
-              <span className="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 border border-gray-200">
-                Total: <strong className="text-gray-900 font-bold">{data.totalRegisteredCompanies}</strong>
+            <div className="flex flex-wrap gap-2 shrink-0 text-xs font-semibold">
+              <span className="px-3 py-1.5 rounded-xl bg-white text-[#52645c] border border-[#dce7e1] shadow-xs">
+                Total: <strong className="text-[#172b25] font-bold">{data.totalRegisteredCompanies}</strong>
               </span>
-              <span className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="px-3 py-1.5 rounded-xl bg-[#eaf6ef] text-[#087f5b] border border-[#bce4ce]">
                 Active Feeds: <strong className="font-bold">{data.statusBreakdown?.ACTIVE_IMPORT ?? 0}</strong>
               </span>
-              <span className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
+              <span className="px-3 py-1.5 rounded-xl bg-white text-[#52645c] border border-[#dce7e1]">
                 Link-Only: <strong className="font-bold">{data.statusBreakdown?.LINK_ONLY ?? 0}</strong>
               </span>
             </div>
@@ -128,24 +126,24 @@ export default function CompaniesPage() {
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-xs mb-8 space-y-4">
+      <div className="bg-white border border-[#dce7e1] rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(18,65,48,0.04)] mb-8 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Search Input */}
           <div className="sm:col-span-6 relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#087f5b]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by company name or domain…"
-              className="w-full pl-10 pr-9 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full pl-10 pr-9 py-2.5 border border-[#dce7e1] rounded-xl text-xs sm:text-sm text-[#172b25] placeholder-[#8ea197] focus:outline-none focus:border-[#087f5b] focus:ring-2 focus:ring-[#087f5b]/20 bg-[#fafcfb]"
               aria-label="Search companies"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8ea197] hover:text-[#172b25]"
                 aria-label="Clear company search"
               >
                 <X className="h-4 w-4" />
@@ -158,7 +156,7 @@ export default function CompaniesPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-3 py-2.5 border border-[#dce7e1] rounded-xl text-xs font-medium text-[#2d4037] bg-[#fafcfb] focus:outline-none focus:border-[#087f5b] cursor-pointer"
               aria-label="Filter by category"
             >
               <option value="ALL">All Categories ({allCompanies.length})</option>
@@ -175,7 +173,7 @@ export default function CompaniesPage() {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+              className="w-full px-3 py-2.5 border border-[#dce7e1] rounded-xl text-xs font-medium text-[#2d4037] bg-[#fafcfb] focus:outline-none focus:border-[#087f5b] cursor-pointer"
               aria-label="Filter by integration status"
             >
               <option value="ALL">All Statuses ({allCompanies.length})</option>
@@ -187,16 +185,16 @@ export default function CompaniesPage() {
         </div>
 
         {/* Filter Feedback and Clear Action */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-gray-500 border-t border-gray-100">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-[#62756d] border-t border-[#edf3f0]">
           <span>
-            Showing <strong className="text-gray-900">{filteredCompanies.length}</strong> of{' '}
-            <strong className="text-gray-900">{allCompanies.length}</strong> companies in registry
+            Showing <strong className="text-[#172b25]">{filteredCompanies.length}</strong> of{' '}
+            <strong className="text-[#172b25]">{allCompanies.length}</strong> companies in registry
           </span>
           {hasActiveFilters && (
             <button
               type="button"
               onClick={clearFilters}
-              className="inline-flex items-center gap-1 text-brand-600 hover:text-brand-800 font-medium"
+              className="inline-flex items-center gap-1 text-[#087f5b] hover:text-[#075e45] font-bold"
             >
               <X className="h-3 w-3" />
               Reset Filters
@@ -214,7 +212,7 @@ export default function CompaniesPage() {
           action={
             <button
               onClick={() => refetch()}
-              className="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition"
+              className="px-5 py-2.5 bg-[#087f5b] text-white text-xs font-bold rounded-xl hover:bg-[#075e45] transition shadow-xs"
             >
               Retry
             </button>
@@ -223,7 +221,7 @@ export default function CompaniesPage() {
       ) : loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {Array.from({ length: 9 }).map((_, i) => (
-            <div key={i} className="h-44 bg-gray-100 rounded-xl animate-pulse"></div>
+            <div key={i} className="h-44 bg-white border border-[#e1ebe6] rounded-2xl animate-pulse"></div>
           ))}
         </div>
       ) : filteredCompanies.length === 0 ? (
@@ -235,7 +233,7 @@ export default function CompaniesPage() {
             action={
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition"
+                className="px-4 py-2 bg-[#eaf6ef] text-[#087f5b] text-xs font-bold rounded-xl hover:bg-[#d8f1e2] border border-[#c5e6d4] transition"
               >
                 Clear Filters
               </button>
@@ -256,7 +254,7 @@ export default function CompaniesPage() {
             return (
               <div
                 key={company.id}
-                className="bg-white border border-gray-200 rounded-xl p-5 shadow-xs hover:border-brand-300 hover:shadow-sm transition flex flex-col justify-between"
+                className="bg-white border border-[#e1ebe6] rounded-2xl p-5 shadow-[0_2px_12px_rgba(18,65,48,0.03)] hover:border-[#a0d6b6] hover:shadow-[0_8px_24px_rgba(18,65,48,0.07)] transition-all flex flex-col justify-between"
               >
                 <div>
                   {/* Card Header: Avatar, Name & Category */}
@@ -265,40 +263,40 @@ export default function CompaniesPage() {
                       <img
                         src={company.logoUrl}
                         alt={`${company.name} logo`}
-                        className="w-12 h-12 rounded-lg object-contain border border-gray-100 bg-white p-1 shrink-0"
+                        className="w-12 h-12 rounded-xl object-contain border border-[#e4ede7] bg-white p-1 shrink-0"
                         onError={(e) => {
                           (e.currentTarget as HTMLImageElement).style.display = 'none';
                         }}
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-lg bg-brand-50 text-brand-700 font-bold flex items-center justify-center text-sm shrink-0 border border-brand-100">
+                      <div className="w-12 h-12 rounded-xl bg-[#eaf6ef] text-[#087f5b] font-display font-extrabold flex items-center justify-center text-sm shrink-0 border border-[#cbe4d4]">
                         {initials || company.name.charAt(0)}
                       </div>
                     )}
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="font-bold text-gray-900 text-base truncate" title={company.name}>
+                        <h3 className="font-display font-bold text-[#172b25] text-[15px] truncate" title={company.name}>
                           {company.name}
                         </h3>
                       </div>
-                      <span className="inline-block text-xs text-gray-500 truncate max-w-full mt-0.5" title={company.category}>
+                      <span className="inline-block text-[11px] text-[#71857b] truncate max-w-full mt-0.5" title={company.category}>
                         {company.category}
                       </span>
                     </div>
                   </div>
 
                   {/* Status & Job Count Meta */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 py-2.5 my-2 border-y border-gray-100 text-xs">
+                  <div className="flex flex-wrap items-center justify-between gap-2 py-2.5 my-2 border-y border-[#edf3f0] text-xs">
                     <div>{getStatusBadge(company.integrationStatus)}</div>
 
                     {hasActiveJobs ? (
-                      <span className="inline-flex items-center gap-1 font-semibold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100">
-                        <Briefcase className="h-3 w-3 text-brand-600" />
+                      <span className="inline-flex items-center gap-1 font-bold text-[#087f5b] bg-[#eaf6ef] px-2 py-0.5 rounded-md border border-[#cbe4d4] text-[10px]">
+                        <Briefcase className="h-3 w-3 text-[#087f5b]" />
                         {company.activeJobCount} active {company.activeJobCount === 1 ? 'job' : 'jobs'}
                       </span>
                     ) : (
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[11px] text-[#8ea197]">
                         {company.integrationStatus === 'ACTIVE_IMPORT'
                           ? '0 active syncs'
                           : 'Official careers link'}
@@ -313,7 +311,7 @@ export default function CompaniesPage() {
                     <>
                       <Link
                         to={`/jobs?company=${company.dbCompanyId}`}
-                        className="font-semibold text-brand-600 hover:text-brand-800 transition inline-flex items-center gap-1"
+                        className="font-bold text-[#087f5b] hover:text-[#075e45] transition inline-flex items-center gap-1"
                       >
                         View {company.activeJobCount} openings
                         <ArrowRight className="h-3 w-3" />
@@ -322,7 +320,7 @@ export default function CompaniesPage() {
                         href={company.careersUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-gray-600 inline-flex items-center gap-1"
+                        className="text-[#8ea197] hover:text-[#172b25] inline-flex items-center gap-1"
                         title="Open official corporate careers page"
                       >
                         Careers Portal
@@ -334,10 +332,10 @@ export default function CompaniesPage() {
                       href={company.careersUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2 px-3 bg-gray-50 hover:bg-brand-50 hover:text-brand-700 text-gray-700 font-medium rounded-lg text-center transition inline-flex items-center justify-center gap-1.5 border border-gray-200 hover:border-brand-200"
+                      className="w-full py-2 px-3 bg-[#f7faf8] hover:bg-[#eaf6ef] hover:text-[#087f5b] text-[#33463e] font-semibold rounded-xl text-center transition inline-flex items-center justify-center gap-1.5 border border-[#e1ebe6] hover:border-[#bce4ce]"
                     >
                       Official Careers Portal
-                      <ExternalLink className="h-3.5 w-3.5 text-gray-400 group-hover:text-brand-500" />
+                      <ExternalLink className="h-3.5 w-3.5 text-[#8ea197]" />
                     </a>
                   )}
                 </div>
@@ -348,40 +346,40 @@ export default function CompaniesPage() {
       )}
 
       {/* ── Separate Section: Explore More Job Sources (Naukri & Unstop) ── */}
-      <section className="bg-gradient-to-r from-gray-50 via-slate-50 to-gray-50 border border-gray-200 rounded-2xl p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-200">
+      <section className="bg-white border border-[#e1ebe6] rounded-2xl p-6 sm:p-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[#edf3f0]">
           <div>
-            <span className="text-xs font-semibold text-brand-600 uppercase tracking-wider block">
-              External Job-Discovery Portals
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#087f5b] block">
+              EXTERNAL JOB-DISCOVERY PORTALS
             </span>
-            <h2 className="text-xl font-bold text-gray-900 mt-0.5">
+            <h2 className="font-display font-extrabold text-xl text-[#172b25] mt-0.5">
               Explore More Job Sources
             </h2>
           </div>
-          <span className="text-xs text-gray-500 max-w-sm text-left sm:text-right">
+          <span className="text-xs text-[#708479] max-w-sm text-left sm:text-right">
             Out-of-registry external discovery portals. Preserved as official link-only sources without private scraping.
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {/* Naukri */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-xs hover:border-brand-300 transition flex flex-col justify-between">
+          <div className="bg-[#fcfdfc] border border-[#e1ebe6] rounded-xl p-5 hover:border-[#a0d6b6] transition flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#eaf6ef] text-[#087f5b] font-display font-bold flex items-center justify-center text-sm border border-[#cbe4d4]">
                     N
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-base">Naukri.com</h3>
-                    <span className="text-[11px] text-gray-500">Lateral Tech & Enterprise Ingestion</span>
+                    <h3 className="font-bold text-[#172b25] text-sm">Naukri.com</h3>
+                    <span className="text-[10px] text-[#708479]">Lateral Tech & Enterprise Ingestion</span>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#f4f7f5] text-[#556960] border border-[#e1ebe6]">
                   LINK_ONLY
                 </span>
               </div>
-              <p className="text-xs text-gray-600 leading-relaxed mb-4">
+              <p className="text-xs text-[#62756d] leading-relaxed mb-4">
                 India's largest job portal for IT, software engineering, and corporate roles. We provide direct outbound search links to search official listings safely on Naukri.
               </p>
             </div>
@@ -390,7 +388,7 @@ export default function CompaniesPage() {
               href="https://www.naukri.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 py-2 px-4 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold rounded-lg transition border border-brand-200"
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-4 bg-[#eaf6ef] hover:bg-[#d8f1e2] text-[#087f5b] text-xs font-bold rounded-xl transition border border-[#cbe4d4]"
             >
               Explore on Naukri.com
               <ExternalLink className="h-3.5 w-3.5" />
@@ -398,23 +396,23 @@ export default function CompaniesPage() {
           </div>
 
           {/* Unstop */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-xs hover:border-teal-300 transition flex flex-col justify-between">
+          <div className="bg-[#fcfdfc] border border-[#e1ebe6] rounded-xl p-5 hover:border-[#a0d6b6] transition flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 font-bold flex items-center justify-center text-sm border border-teal-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#eaf6ef] text-[#087f5b] font-display font-bold flex items-center justify-center text-sm border border-[#cbe4d4]">
                     U
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-base">Unstop</h3>
-                    <span className="text-[11px] text-gray-500">Fresher Drives, Hackathons & Internships</span>
+                    <h3 className="font-bold text-[#172b25] text-sm">Unstop</h3>
+                    <span className="text-[10px] text-[#708479]">Fresher Drives, Hackathons & Internships</span>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#f4f7f5] text-[#556960] border border-[#e1ebe6]">
                   LINK_ONLY
                 </span>
               </div>
-              <p className="text-xs text-gray-600 leading-relaxed mb-4">
+              <p className="text-xs text-[#62756d] leading-relaxed mb-4">
                 Early-career opportunities, student hackathons, campus hiring challenges, and graduate programmes. Explore directly on Unstop's official platform.
               </p>
             </div>
@@ -423,7 +421,7 @@ export default function CompaniesPage() {
               href="https://unstop.com/jobs"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 py-2 px-4 bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold rounded-lg transition border border-teal-200"
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-4 bg-[#eaf6ef] hover:bg-[#d8f1e2] text-[#087f5b] text-xs font-bold rounded-xl transition border border-[#cbe4d4]"
             >
               Explore on Unstop
               <ExternalLink className="h-3.5 w-3.5" />
@@ -431,8 +429,8 @@ export default function CompaniesPage() {
           </div>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-gray-200 flex items-center gap-2 text-xs text-gray-500">
-          <ShieldCheck className="h-4 w-4 text-brand-600 shrink-0" />
+        <div className="mt-5 pt-4 border-t border-[#edf3f0] flex items-center gap-2 text-xs text-[#62756d]">
+          <ShieldCheck className="h-4 w-4 text-[#087f5b] shrink-0" />
           <span>
             Aggregator portals are separate from our verified company ATS crawler. NextRole India respects provider terms and never bypasses anti-bot defenses.
           </span>

@@ -1,32 +1,162 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useJob } from '../lib/hooks';
 import {
   MapPin,
   ExternalLink,
   Clock,
-  CheckCircle,
-  Building2,
+  CheckCircle2,
   ChevronRight,
   AlertTriangle,
   ArrowLeft,
   Calendar,
-  Shield
+  ShieldCheck,
+  Bookmark,
+  Share2,
+  Building,
+  Briefcase,
+  Globe
 } from 'lucide-react';
+import { isJobSaved, toggleSaveJob } from '../lib/savedJobs';
+
+// ── Structured Job Description Component (Safe, No dangerouslySetInnerHTML) ──
+function FormattedDescription({ text }: { text?: string }) {
+  if (!text || text.trim() === '') {
+    return (
+      <p className="text-sm text-[#708479] italic">
+        No detailed description provided by the employer. Please visit the official career page for complete responsibilities and qualifications.
+      </p>
+    );
+  }
+
+  // Split into paragraphs by double newlines or single newlines
+  const blocks = text.split(/\n{2,}/);
+
+  return (
+    <div className="space-y-4 text-sm leading-relaxed text-[#23352b]">
+      {blocks.map((block, idx) => {
+        const trimmed = block.trim();
+        if (!trimmed) return null;
+
+        // Heading detection
+        if (trimmed.startsWith('### ')) {
+          return (
+            <h3
+              key={idx}
+              className="font-display font-bold text-base text-[#172b25] mt-6 mb-2 tracking-tight flex items-center gap-2 pt-2 border-t border-[#edf3ef] first:border-0 first:pt-0"
+            >
+              <span className="w-1.5 h-4 bg-[#087f5b] rounded-full inline-block" />
+              {trimmed.substring(4)}
+            </h3>
+          );
+        }
+
+        if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
+          return (
+            <h2
+              key={idx}
+              className="font-display font-bold text-lg text-[#172b25] mt-6 mb-2 tracking-tight"
+            >
+              {trimmed.replace(/^#+\s*/, '')}
+            </h2>
+          );
+        }
+
+        // Bullet point list detection
+        const lines = trimmed.split('\n');
+        const isBulletList = lines.every((line) => line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*'));
+
+        if (isBulletList) {
+          return (
+            <ul key={idx} className="space-y-2 my-3 pl-1">
+              {lines.map((line, lIdx) => {
+                const cleanText = line.replace(/^[•\-\*]\s*/, '').trim();
+                if (!cleanText) return null;
+                return (
+                  <li key={lIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-[#2d4036] leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#087f5b] mt-2 shrink-0" />
+                    <span>{cleanText}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          );
+        }
+
+        // Regular paragraph or mixed bullet lines
+        if (lines.length > 1 && lines.some((line) => line.trim().startsWith('•') || line.trim().startsWith('-'))) {
+          return (
+            <div key={idx} className="space-y-2 my-2">
+              {lines.map((line, lIdx) => {
+                const lTrim = line.trim();
+                if (lTrim.startsWith('•') || lTrim.startsWith('-') || lTrim.startsWith('*')) {
+                  return (
+                    <div key={lIdx} className="flex items-start gap-2.5 pl-2 text-xs sm:text-sm text-[#2d4036] leading-relaxed">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#087f5b] mt-2 shrink-0" />
+                      <span>{lTrim.replace(/^[•\-\*]\s*/, '')}</span>
+                    </div>
+                  );
+                }
+                return (
+                  <p key={lIdx} className="text-xs sm:text-sm text-[#2d4036] leading-relaxed">
+                    {lTrim}
+                  </p>
+                );
+              })}
+            </div>
+          );
+        }
+
+        return (
+          <p key={idx} className="text-xs sm:text-sm text-[#2d4036] leading-relaxed">
+            {trimmed}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const jobId = id ? parseInt(id, 10) : 0;
   const { data: job, loading, error, notFound } = useJob(jobId);
+  const [saved, setSaved] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (jobId) {
+      setSaved(isJobSaved(jobId));
+    }
+  }, [jobId]);
+
+  const handleToggleSave = () => {
+    if (!job) return;
+    const next = toggleSaveJob(job.id);
+    setSaved(next);
+  };
+
+  const handleShare = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+      <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="animate-pulse space-y-6">
-          <div className="h-6 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-10 bg-gray-200 rounded w-3/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          <div className="h-64 bg-gray-100 rounded"></div>
+          <div className="h-5 bg-[#e8eee9] rounded w-1/4"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="h-10 bg-[#e8eee9] rounded w-3/4"></div>
+              <div className="h-5 bg-[#e8eee9] rounded w-1/2"></div>
+              <div className="h-64 bg-[#edf3ee] rounded-2xl"></div>
+            </div>
+            <div className="h-80 bg-[#edf3ee] rounded-2xl"></div>
+          </div>
         </div>
       </div>
     );
@@ -35,14 +165,14 @@ export default function JobDetailPage() {
   if (notFound || !job) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
-        <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-gray-900 mb-2">Job No Longer Available</h1>
-        <p className="text-sm text-gray-600 mb-6">
+        <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+        <h1 className="font-display text-xl font-bold text-[#172b25] mb-2">Job No Longer Available</h1>
+        <p className="text-sm text-[#667a70] mb-6">
           This position has either expired, been closed by the employer, or the link is invalid.
         </p>
         <Link
           to="/jobs"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#087f5b] text-white text-xs font-bold rounded-xl hover:bg-[#075e45] transition shadow-xs"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to all jobs
@@ -73,132 +203,232 @@ export default function JobDetailPage() {
     : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-        <Link to="/" className="hover:text-brand-600">Home</Link>
-        <ChevronRight className="h-4 w-4" />
-        <Link to="/jobs" className="hover:text-brand-600">Jobs</Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-gray-900 truncate max-w-xs">{job.title}</span>
+    <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Breadcrumb Navigation */}
+      <nav className="flex items-center gap-2 text-xs text-[#708479] mb-6 flex-wrap" aria-label="Breadcrumbs">
+        <Link to="/" className="hover:text-[#087f5b] transition-colors">Home</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <Link to="/jobs" className="hover:text-[#087f5b] transition-colors">Jobs</Link>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <span className="text-[#172b25] font-semibold truncate max-w-xs">{job.title}</span>
       </nav>
 
-      {/* Main Card */}
-      <div className="bg-white border border-gray-200 rounded-xl p-6 sm:p-8 shadow-sm mb-6">
-        <div className="flex flex-col sm:flex-row items-start justify-between gap-6 pb-6 border-b border-gray-100">
-          <div className="flex items-start gap-4">
-            {job.companyLogoUrl ? (
-              <img
-                src={job.companyLogoUrl}
-                alt={`${job.companyName} logo`}
-                className="w-14 h-14 rounded-lg object-contain border border-gray-100 p-1 bg-white"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            ) : (
-              <div className="w-14 h-14 rounded-lg bg-brand-50 text-brand-700 font-bold flex items-center justify-center text-xl">
-                {job.companyName.charAt(0)}
-              </div>
-            )}
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{job.title}</h1>
-              <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-gray-600">
-                <span className="font-medium text-gray-800">{job.companyName}</span>
-                {job.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5 text-gray-400" />
-                    {job.location}
+      {/* Two-Column Responsive Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Main Left Column */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Main Card Header */}
+          <div className="bg-white border border-[#e1ebe6] rounded-2xl p-6 sm:p-8 shadow-[0_4px_24px_rgba(18,65,48,0.04)]">
+            <div className="flex items-start gap-4 pb-6 border-b border-[#edf3f0]">
+              {job.companyLogoUrl ? (
+                <img
+                  src={job.companyLogoUrl}
+                  alt={`${job.companyName} logo`}
+                  className="w-14 h-14 rounded-xl object-contain border border-[#e4ede7] p-1.5 bg-white shrink-0"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-xl bg-[#eaf6ef] text-[#087f5b] font-display font-bold flex items-center justify-center text-xl shrink-0 border border-[#cbe4d4]">
+                  {job.companyName.charAt(0)}
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 text-xs font-bold text-[#556960] mb-1">
+                  <span>{job.companyName}</span>
+                  <span className="inline-flex items-center justify-center w-3.5 h-3.5 bg-[#e4f5eb] text-[#087f5b] rounded-full text-[8px]" title="Verified ATS Feed">
+                    ✓
                   </span>
+                </div>
+                <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-[#172b25] tracking-tight leading-snug">
+                  {job.title}
+                </h1>
+                {job.location && (
+                  <div className="flex items-center gap-1.5 text-xs text-[#708479] mt-2">
+                    <MapPin className="w-3.5 h-3.5 text-[#087f5b]" />
+                    <span>{job.location}</span>
+                    {job.country && <span className="text-[#a4b5ac]">({job.country})</span>}
+                  </div>
                 )}
               </div>
             </div>
+
+            {/* Badges Bar */}
+            <div className="flex flex-wrap items-center gap-2 pt-4">
+              {job.isEmployerSubmitted && (
+                <span className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-[#e7f6ef] text-[#087f5b] border border-[#bce4ce]">
+                  Direct Employer
+                </span>
+              )}
+              {job.jobType && (
+                <span className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[#f0f4ff] text-[#345ec4] border border-[#d6e2ff]">
+                  {job.jobType.replace(/_/g, ' ')}
+                </span>
+              )}
+              {job.experienceLevel && (
+                <span className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[#f4f7ea] text-[#4d7014] border border-[#e1eccd]">
+                  {job.experienceLevel.replace(/_/g, ' ')}
+                </span>
+              )}
+              {job.workMode && (
+                <span className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-[#f5f7f6] text-[#455850] border border-[#e0e8e4]">
+                  {job.workMode.replace(/_/g, ' ')}
+                </span>
+              )}
+            </div>
+
+            {/* Stale Warning Banner if applicable */}
+            {isStale && (
+              <div className="mt-5 p-3.5 bg-[#fef9ec] border border-[#fae2be] rounded-xl flex items-center gap-2.5 text-xs text-[#8f5e12]">
+                <AlertTriangle className="h-4 w-4 text-[#d97706] shrink-0" />
+                <span>This position was last verified over 7 days ago and may have been filled by the employer.</span>
+              </div>
+            )}
+
+            {/* Structured Job Description */}
+            <div className="mt-8 pt-6 border-t border-[#edf3f0]">
+              <h2 className="font-display font-extrabold text-lg text-[#172b25] mb-4">
+                Role Description & Requirements
+              </h2>
+              <div className="bg-[#f9fbf9] p-5 sm:p-7 rounded-2xl border border-[#e7ede9]">
+                <FormattedDescription text={job.description} />
+              </div>
+            </div>
+
+            {/* Application Disclaimer */}
+            <div className="mt-8 p-4 bg-[#eef8f2] border border-[#cbe4d4] rounded-xl text-xs text-[#2b4438] flex items-start gap-3">
+              <ShieldCheck className="h-5 w-5 text-[#087f5b] shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <span className="font-bold block mb-0.5 text-[#172b25]">Application Transparency Notice</span>
+                You will be redirected to the official career portal ({job.sourceType || 'ATS'} / {job.companyName}) to submit your resume. NextRole India never charges candidates, asks for personal financial information, or conducts interviews.
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="mt-8 pt-6 border-t border-[#edf3f0] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <Link to="/jobs" className="text-xs font-semibold text-[#667a70] hover:text-[#172b25] flex items-center gap-1.5">
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Browse more positions
+              </Link>
+              <a
+                href={job.applyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-[#087f5b] hover:bg-[#075e45] text-white font-bold text-xs rounded-xl transition shadow-xs"
+              >
+                Apply on Official Site
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Sticky Sidebar */}
+        <aside className="lg:sticky lg:top-24 space-y-5">
+          {/* Main Action Card */}
+          <div className="bg-white border border-[#e1ebe6] rounded-2xl p-6 shadow-[0_4px_24px_rgba(18,65,48,0.04)] space-y-5">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#087f5b] block mb-1">
+                APPLICATION LINK
+              </span>
+              <a
+                href={job.applyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-[#087f5b] hover:bg-[#075e45] text-white font-display font-extrabold text-sm rounded-xl transition-all shadow-[0_4px_14px_rgba(8,127,91,0.25)] active:scale-[0.98]"
+              >
+                Apply on official website
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleToggleSave}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-bold transition-colors ${
+                  saved
+                    ? 'bg-[#e7f6ef] border-[#bce4ce] text-[#087f5b]'
+                    : 'border-[#e1ebe6] text-[#556960] hover:bg-[#f3f8f5]'
+                }`}
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} />
+                {saved ? 'Saved' : 'Save Role'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#e1ebe6] text-xs font-bold text-[#556960] hover:bg-[#f3f8f5] transition-colors"
+                title="Copy job link"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>{copied ? 'Copied!' : 'Share'}</span>
+              </button>
+            </div>
+
+            {/* Role Metadata Details */}
+            <div className="pt-4 border-t border-[#edf3f0] space-y-3 text-xs">
+              <div className="flex items-center justify-between text-[#667a70]">
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#087f5b]" />
+                  Posted Date
+                </span>
+                <span className="font-semibold text-[#172b25]">{formattedPublished || 'Recent'}</span>
+              </div>
+
+              {formattedVerified && (
+                <div className="flex items-center justify-between text-[#667a70]">
+                  <span className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#087f5b]" />
+                    Last Verified
+                  </span>
+                  <span className="font-semibold text-[#087f5b]">{formattedVerified}</span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between text-[#667a70]">
+                <span className="flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-[#087f5b]" />
+                  Country Eligibility
+                </span>
+                <span className="font-semibold text-[#172b25]">{job.country || 'India'}</span>
+              </div>
+
+              {job.sourceType && (
+                <div className="flex items-center justify-between text-[#667a70]">
+                  <span className="flex items-center gap-1.5">
+                    <Briefcase className="w-3.5 h-3.5 text-[#087f5b]" />
+                    ATS System
+                  </span>
+                  <span className="font-semibold text-[#172b25]">{job.sourceType}</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Primary Action Button */}
-          <a
-            href={job.applyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm rounded-lg transition shadow-sm"
-          >
-            Apply on official website
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        </div>
-
-        {/* Badges & Meta */}
-        <div className="flex flex-wrap items-center gap-2 py-4 border-b border-gray-100">
-          {job.jobType && (
-            <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-100">
-              {job.jobType.replace(/_/g, ' ')}
-            </span>
-          )}
-          {job.experienceLevel && (
-            <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-green-50 text-green-700 border border-green-100">
-              {job.experienceLevel.replace(/_/g, ' ')}
-            </span>
-          )}
-          {job.workMode && (
-            <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-teal-50 text-teal-700 border border-teal-100">
-              {job.workMode.replace(/_/g, ' ')}
-            </span>
-          )}
-          {formattedPublished && (
-            <span className="flex items-center gap-1 text-xs text-gray-500 ml-auto">
-              <Calendar className="h-3.5 w-3.5 text-gray-400" />
-              Posted {formattedPublished}
-            </span>
-          )}
-          {formattedVerified && (
-            <span className="flex items-center gap-1 text-xs text-teal-600">
-              <CheckCircle className="h-3.5 w-3.5" />
-              Verified {formattedVerified}
-            </span>
-          )}
-        </div>
-
-        {/* Stale Warning Banner if applicable */}
-        {isStale && (
-          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-xs text-amber-800">
-            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
-            <span>This position was last verified over 7 days ago and may have been filled by the employer.</span>
+          {/* Company Mini Card */}
+          <div className="bg-[#edf7f0] border border-[#dceee1] rounded-2xl p-5 space-y-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#087f5b]">
+              <Building className="w-4 h-4" />
+              <span>About Employer</span>
+            </div>
+            <p className="font-display font-bold text-base text-[#172b25]">{job.companyName}</p>
+            <p className="text-xs text-[#5f7469] leading-relaxed">
+              Tracked via official applicant tracking system. Positions are synced continuously to ensure direct candidate access.
+            </p>
+            <div className="pt-2">
+              <Link
+                to={`/jobs?q=${encodeURIComponent(job.companyName)}`}
+                className="text-xs font-bold text-[#087f5b] hover:underline inline-flex items-center gap-1"
+              >
+                More jobs at {job.companyName} →
+              </Link>
+            </div>
           </div>
-        )}
-
-        {/* Job Description (Safely rendered as plain text) */}
-        <div className="mt-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">Job Description & Details</h2>
-          <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed font-sans bg-gray-50/50 p-6 rounded-lg border border-gray-100">
-            {job.description || 'No detailed description provided by the employer. Please visit the official career page for complete responsibilities and requirements.'}
-          </div>
-        </div>
-
-        {/* Application Disclaimer */}
-        <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800 flex items-start gap-3">
-          <Shield className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <span className="font-semibold block mb-0.5">Application Transparency Notice</span>
-            You will be redirected to the official career portal ({job.sourceType || 'ATS'} / {job.companyName}) to submit your resume. NextRole India never charges candidates, asks for personal financial information, or conducts interviews.
-          </div>
-        </div>
-
-        {/* Secondary Apply Footer */}
-        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link to="/jobs" className="text-sm text-gray-500 hover:text-gray-900 flex items-center gap-1">
-            <ArrowLeft className="h-4 w-4" />
-            Browse more positions
-          </Link>
-          <a
-            href={job.applyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm rounded-lg transition"
-          >
-            Apply Now
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        </div>
+        </aside>
       </div>
     </div>
   );

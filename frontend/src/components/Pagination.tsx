@@ -36,19 +36,19 @@ export default function Pagination({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8">
-      <p className="text-sm text-gray-500">
-        Showing <span className="font-medium text-gray-800">{start}</span>–
-        <span className="font-medium text-gray-800">{end}</span> of{' '}
-        <span className="font-medium text-gray-800">{totalElements.toLocaleString()}</span> jobs
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-4 border-t border-[#edf3f0]">
+      <p className="text-xs text-[#708479]">
+        Showing <span className="font-bold text-[#172b25]">{start}</span>–
+        <span className="font-bold text-[#172b25]">{end}</span> of{' '}
+        <span className="font-bold text-[#172b25]">{totalElements.toLocaleString()}</span> jobs
       </p>
 
-      <nav className="flex items-center gap-1" aria-label="Pagination">
+      <nav className="flex items-center gap-1.5" aria-label="Pagination">
         <button
           type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 0}
-          className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#556960] border border-[#dce7e1] hover:bg-[#eaf6ef] hover:text-[#087f5b] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           aria-label="Previous page"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -57,7 +57,7 @@ export default function Pagination({
 
         {pages.map((p, idx) =>
           p === '...' ? (
-            <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 text-sm select-none">
+            <span key={`ellipsis-${idx}`} className="px-2 text-[#9bb0a5] text-xs select-none">
               …
             </span>
           ) : (
@@ -65,10 +65,10 @@ export default function Pagination({
               key={p}
               type="button"
               onClick={() => onPageChange(p as number)}
-              className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors ${
+              className={`h-8 w-8 rounded-xl text-xs font-bold transition-all ${
                 p === currentPage
-                  ? 'bg-brand-600 text-white shadow-sm'
-                  : 'text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-[#087f5b] text-white shadow-xs'
+                  : 'text-[#44584f] border border-[#dce7e1] hover:bg-[#eaf6ef] hover:text-[#087f5b]'
               }`}
               aria-label={`Page ${(p as number) + 1}`}
               aria-current={p === currentPage ? 'page' : undefined}
@@ -82,7 +82,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages - 1}
-          className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#556960] border border-[#dce7e1] hover:bg-[#eaf6ef] hover:text-[#087f5b] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           aria-label="Next page"
         >
           Next

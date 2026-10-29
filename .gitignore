@@ -34,3 +34,7 @@ logs/
 
 # Docker
 .dockerignore
+
+# References & temporary archives
+*.zip
+ui-reference/

@@ -4,23 +4,27 @@ import { ArrowLeft, Home } from 'lucide-react';
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center">
-      <h1 className="text-6xl font-extrabold text-brand-600">404</h1>
-      <h2 className="text-2xl font-bold text-gray-900 mt-4 mb-2">Page Not Found</h2>
-      <p className="text-gray-500 max-w-sm mb-6 text-sm">
-        The page you are looking for does not exist or may have been moved.
+    <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center py-16">
+      <div className="w-16 h-16 rounded-2xl bg-[#eaf6ef] text-[#087f5b] flex items-center justify-center font-display font-extrabold text-2xl mb-4 border border-[#cbe4d4]">
+        404
+      </div>
+      <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-[#172b25] mb-2 tracking-tight">
+        Page Not Found
+      </h1>
+      <p className="text-xs sm:text-sm text-[#64776e] max-w-sm mb-6 leading-relaxed">
+        The opportunity or page you are looking for does not exist or may have been updated.
       </p>
-      <div className="flex gap-4">
+      <div className="flex items-center gap-3">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#087f5b] text-white rounded-xl text-xs font-bold hover:bg-[#075e45] transition shadow-xs"
         >
           <Home className="h-4 w-4" />
           Home
         </Link>
         <Link
           to="/jobs"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#eaf6ef] text-[#087f5b] rounded-xl text-xs font-bold hover:bg-[#d8f1e2] border border-[#cbe4d4] transition"
         >
           <ArrowLeft className="h-4 w-4" />
           Browse Jobs

@@ -9,6 +9,7 @@ import com.nextrole.enums.JobStatus;
 import com.nextrole.exception.ResourceNotFoundException;
 import com.nextrole.repository.JobRepository;
 import com.nextrole.repository.JobSpecification;
+import com.nextrole.util.HtmlDescriptionSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -143,18 +144,6 @@ public class JobService {
     }
 
     private String sanitizeDescription(String input) {
-        if (input == null || input.isBlank()) {
-            return "";
-        }
-        // Strip HTML tags and normalize entities to prevent frontend script execution
-        return input.replaceAll("<[^>]+>", " ")
-                .replaceAll("&amp;", "&")
-                .replaceAll("&lt;", "<")
-                .replaceAll("&gt;", ">")
-                .replaceAll("&quot;", "\"")
-                .replaceAll("&#39;", "'")
-                .replaceAll("&nbsp;", " ")
-                .replaceAll("\\s{2,}", " ")
-                .trim();
+        return HtmlDescriptionSanitizer.sanitize(input);
     }
 }

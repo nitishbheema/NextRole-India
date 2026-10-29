@@ -24,7 +24,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#cbe4d4] border-t-[#087f5b] rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -40,7 +40,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-white text-gray-900 font-sans">
+        <div className="min-h-screen flex flex-col bg-[#f7faf8] text-[#172b25] font-sans">
           <Navbar />
           <main className="flex-grow">
             <Routes>

@@ -1,20 +1,58 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a;
+  --font-sans: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Manrope', 'DM Sans', system-ui, sans-serif;
+
+  --color-brand-50: #e7f6ef;
+  --color-brand-100: #d2ede0;
+  --color-brand-200: #a8dbc2;
+  --color-brand-300: #72c39e;
+  --color-brand-400: #3ca97d;
+  --color-brand-500: #176b3a;
+  --color-brand-600: #087f5b;
+  --color-brand-700: #075e45;
+  --color-brand-800: #073f32;
+  --color-brand-900: #04251e;
+  --color-brand-lime: #d8f26a;
+
+  --color-canvas: #f7faf8;
+  --color-ink: #172b25;
+  --color-muted: #6d7e77;
+  --color-line: #e1ebe6;
+}
+
+:root {
+  --green: #087f5b;
+  --green-dark: #075e45;
+  --green-deep: #073f32;
+  --green-light: #e7f6ef;
+  --lime: #d8f26a;
+  --ink: #172b25;
+  --muted: #6d7e77;
+  --line: #e1ebe6;
+  --canvas: #f7faf8;
+  --white: #ffffff;
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #ffffff;
-  color: #111827;
+  font-family: var(--font-sans);
+  background-color: var(--canvas);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-display);
+}
+
+/* Card subtle hover elevation */
+.card-hover {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: #a8d9bd;
+  box-shadow: 0 12px 32px rgba(18, 65, 48, 0.08);
 }
