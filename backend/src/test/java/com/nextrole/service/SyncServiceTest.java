@@ -9,7 +9,6 @@ import com.nextrole.enums.JobStatus;
 import com.nextrole.enums.JobType;
 import com.nextrole.enums.SourceType;
 import com.nextrole.enums.WorkMode;
-import com.nextrole.repository.CompanyRepository;
 import com.nextrole.repository.JobRepository;
 import com.nextrole.repository.JobSourceRepository;
 import com.nextrole.repository.SyncRunRepository;
@@ -22,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,9 +30,12 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class SyncServiceTest {
 
     @Mock
@@ -95,7 +99,8 @@ class SyncServiceTest {
         );
 
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(newJob));
-        when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of());
+        when(jobRepository.findBySourceIdAndSourceJobId(testSource.getId(), "job-1")).thenReturn(Optional.empty());
+        when(jobRepository.findActiveJobsNotInFetchedSet(eq(testSource.getId()), anyList())).thenReturn(List.of());
 
         SyncRun result = orchestrator.syncSource(testSource);
 
@@ -143,7 +148,7 @@ class SyncServiceTest {
 
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(updatedJob));
         when(jobRepository.findBySourceIdAndSourceJobId(testSource.getId(), "job-1")).thenReturn(Optional.of(existingJob));
-        when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of(existingJob));
+        when(jobRepository.findActiveJobsNotInFetchedSet(eq(testSource.getId()), anyList())).thenReturn(List.of());
 
         SyncRun result = orchestrator.syncSource(testSource);
 
@@ -184,7 +189,7 @@ class SyncServiceTest {
 
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of(closedJob));
         when(jobRepository.findBySourceIdAndSourceJobId(testSource.getId(), "job-closed")).thenReturn(Optional.of(existingJob));
-        when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of(existingJob));
+        when(jobRepository.findActiveJobsNotInFetchedSet(eq(testSource.getId()), anyList())).thenReturn(List.of());
 
         SyncRun result = orchestrator.syncSource(testSource);
 
@@ -209,7 +214,7 @@ class SyncServiceTest {
 
         // Run 1: Source returns empty list (complete successful fetch with 0 active jobs)
         when(mockAdapter.fetchJobs(testSource)).thenReturn(List.of());
-        when(jobRepository.findBySourceId(testSource.getId())).thenReturn(List.of(jobToMiss));
+        when(jobRepository.findActiveJobsBySource(testSource.getId())).thenReturn(List.of(jobToMiss));
 
         orchestrator.syncSource(testSource);
 

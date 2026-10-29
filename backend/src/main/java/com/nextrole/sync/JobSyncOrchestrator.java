@@ -185,7 +185,7 @@ public class JobSyncOrchestrator {
 
         // Handle jobs not in fetched set
         List<Job> missingJobs = fetchedIds.isEmpty()
-                ? new ArrayList<>()
+                ? jobRepository.findActiveJobsBySource(source.getId())
                 : jobRepository.findActiveJobsNotInFetchedSet(source.getId(), new ArrayList<>(fetchedIds));
 
         List<Long> toExpireIds = new ArrayList<>();
