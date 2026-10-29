@@ -86,7 +86,7 @@ public final class HtmlDescriptionSanitizer {
         int consecutiveEmptyLines = 0;
 
         for (String line : lines) {
-            String trimmed = line.trim();
+            String trimmed = line.trim().replaceAll("[ \\t]{2,}", " ");
             if (trimmed.isEmpty()) {
                 consecutiveEmptyLines++;
                 if (consecutiveEmptyLines <= 2) {
