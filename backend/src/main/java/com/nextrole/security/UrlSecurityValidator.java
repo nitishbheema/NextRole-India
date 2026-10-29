@@ -72,24 +72,7 @@ public class UrlSecurityValidator {
 
         host = host.toLowerCase().trim();
 
-        // 1. SSRF Protection: Check for private, loopback, link-local, and cloud metadata IPs
-        try {
-            InetAddress[] addresses = InetAddress.getAllByName(host);
-            for (InetAddress addr : addresses) {
-                if (isPrivateOrReservedIp(addr)) {
-                    log.warn("Blocked SSRF attempt to restricted IP {} from host {}", addr.getHostAddress(), host);
-                    return new SecurityScanResult(RiskLabel.MALICIOUS, 100,
-                            List.of("SSRF_VIOLATION: Restricted IP (" + addr.getHostAddress() + ")"),
-                            candidateUrl, null, false, "SSRF Guard");
-                }
-            }
-        } catch (UnknownHostException e) {
-            flags.add("DNS_RESOLUTION_FAILED");
-            threatScore += 40;
-            return new SecurityScanResult(RiskLabel.UNAVAILABLE, Math.max(threatScore, 50), flags, candidateUrl, null, false, "Internal Validator");
-        }
-
-        // 2. Lookalike / Punycode / Suspicious domain patterns
+        // 1. Static pattern checks: Lookalike / Punycode / Suspicious domain patterns
         if (host.startsWith("xn--") || host.contains(".xn--")) {
             flags.add("PUNYCODE_HOMOGRAPH_DOMAIN");
             threatScore += 50;
@@ -111,88 +94,108 @@ public class UrlSecurityValidator {
             threatScore += 30;
         }
 
-        // 3. Domain match check with company website or known ATS
+        // Domain match check with company website or known ATS
         boolean domainTrusted = isDomainTrusted(host, companyWebsite);
         if (!domainTrusted) {
             flags.add("DOMAIN_MISMATCH: Destination does not match employer website or verified ATS");
             threatScore += 25;
         }
 
-        // 4. Safe connectivity & redirect check (capped at 3 redirects, timeout 5s)
-        String finalUrl = candidateUrl;
-        boolean reachable = false;
+        // 2. SSRF Protection: Check for private, loopback, link-local, and cloud metadata IPs
+        boolean dnsResolved = false;
         try {
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(5))
-                    .followRedirects(HttpClient.Redirect.NEVER)
-                    .build();
-
-            String currentUrl = candidateUrl;
-            int redirectCount = 0;
-            final int maxRedirects = 3;
-
-            while (redirectCount <= maxRedirects) {
-                HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create(currentUrl))
-                        .timeout(Duration.ofSeconds(5))
-                        .header("User-Agent", "NextRole-India-LinkVerifier/1.0 (+https://nextrole-india.onrender.com)")
-                        .method("HEAD", HttpRequest.BodyPublishers.noBody())
-                        .build();
-
-                HttpResponse<Void> resp = client.send(req, HttpResponse.BodyHandlers.discarding());
-                int status = resp.statusCode();
-
-                if (status >= 200 && status < 300) {
-                    reachable = true;
-                    finalUrl = currentUrl;
-                    break;
-                } else if (status >= 300 && status < 400) {
-                    Optional<String> locationOpt = resp.headers().firstValue("Location");
-                    if (locationOpt.isPresent()) {
-                        String nextUrl = locationOpt.get();
-                        if (!nextUrl.startsWith("http://") && !nextUrl.startsWith("https://")) {
-                            URI baseUri = URI.create(currentUrl);
-                            nextUrl = baseUri.resolve(nextUrl).toString();
-                        }
-
-                        // Validate redirect target for SSRF
-                        URI nextUri = URI.create(nextUrl);
-                        String nextHost = nextUri.getHost();
-                        if (nextHost != null) {
-                            InetAddress[] nextAddrs = InetAddress.getAllByName(nextHost);
-                            for (InetAddress addr : nextAddrs) {
-                                if (isPrivateOrReservedIp(addr)) {
-                                    return new SecurityScanResult(RiskLabel.MALICIOUS, 100,
-                                            List.of("SSRF_VIOLATION: Redirect to restricted IP (" + addr.getHostAddress() + ")"),
-                                            candidateUrl, nextUrl, false, "SSRF Guard");
-                                }
-                            }
-                        }
-
-                        currentUrl = nextUrl;
-                        redirectCount++;
-                    } else {
-                        break;
-                    }
-                } else if (status == 405 || status == 403) {
-                    // Some enterprise job boards block HEAD requests with 403 or 405
-                    reachable = true;
-                    finalUrl = currentUrl;
-                    break;
-                } else {
-                    flags.add("HTTP_STATUS_" + status);
-                    break;
+            InetAddress[] addresses = InetAddress.getAllByName(host);
+            dnsResolved = true;
+            for (InetAddress addr : addresses) {
+                if (isPrivateOrReservedIp(addr)) {
+                    log.warn("Blocked SSRF attempt to restricted IP {} from host {}", addr.getHostAddress(), host);
+                    return new SecurityScanResult(RiskLabel.MALICIOUS, 100,
+                            List.of("SSRF_VIOLATION: Restricted IP (" + addr.getHostAddress() + ")"),
+                            candidateUrl, null, false, "SSRF Guard");
                 }
             }
+        } catch (UnknownHostException e) {
+            flags.add("DNS_RESOLUTION_FAILED");
+            threatScore += 40;
+        }
 
-            if (redirectCount > maxRedirects) {
-                flags.add("EXCESSIVE_REDIRECTS");
-                threatScore += 25;
+        // 3. Safe connectivity & redirect check (capped at 3 redirects, timeout 5s)
+        String finalUrl = candidateUrl;
+        boolean reachable = false;
+        if (dnsResolved) {
+            try {
+                HttpClient client = HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(3))
+                        .followRedirects(HttpClient.Redirect.NEVER)
+                        .build();
+
+                String currentUrl = candidateUrl;
+                int redirectCount = 0;
+                final int maxRedirects = 3;
+
+                while (redirectCount <= maxRedirects) {
+                    HttpRequest req = HttpRequest.newBuilder()
+                            .uri(URI.create(currentUrl))
+                            .timeout(Duration.ofSeconds(3))
+                            .header("User-Agent", "NextRole-India-LinkVerifier/1.0 (+https://nextrole-india.onrender.com)")
+                            .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                            .build();
+
+                    HttpResponse<Void> resp = client.send(req, HttpResponse.BodyHandlers.discarding());
+                    int status = resp.statusCode();
+
+                    if (status >= 200 && status < 300) {
+                        reachable = true;
+                        finalUrl = currentUrl;
+                        break;
+                    } else if (status >= 300 && status < 400) {
+                        Optional<String> locationOpt = resp.headers().firstValue("Location");
+                        if (locationOpt.isPresent()) {
+                            String nextUrl = locationOpt.get();
+                            if (!nextUrl.startsWith("http://") && !nextUrl.startsWith("https://")) {
+                                URI baseUri = URI.create(currentUrl);
+                                nextUrl = baseUri.resolve(nextUrl).toString();
+                            }
+
+                            // Validate redirect target for SSRF
+                            URI nextUri = URI.create(nextUrl);
+                            String nextHost = nextUri.getHost();
+                            if (nextHost != null) {
+                                InetAddress[] nextAddrs = InetAddress.getAllByName(nextHost);
+                                for (InetAddress addr : nextAddrs) {
+                                    if (isPrivateOrReservedIp(addr)) {
+                                        return new SecurityScanResult(RiskLabel.MALICIOUS, 100,
+                                                List.of("SSRF_VIOLATION: Redirect to restricted IP (" + addr.getHostAddress() + ")"),
+                                                candidateUrl, nextUrl, false, "SSRF Guard");
+                                    }
+                                }
+                            }
+
+                            currentUrl = nextUrl;
+                            redirectCount++;
+                        } else {
+                            break;
+                        }
+                    } else if (status == 405 || status == 403) {
+                        // Some enterprise job boards block HEAD requests with 403 or 405
+                        reachable = true;
+                        finalUrl = currentUrl;
+                        break;
+                    } else {
+                        flags.add("HTTP_STATUS_" + status);
+                        break;
+                    }
+                }
+
+                if (redirectCount > maxRedirects) {
+                    flags.add("EXCESSIVE_REDIRECTS");
+                    threatScore += 25;
+                }
+            } catch (Exception e) {
+                log.debug("Link reachability check failed for {}: {}", candidateUrl, e.getMessage());
+                flags.add("REACHABILITY_CHECK_FAILED: " + e.getMessage());
+                threatScore += 15;
             }
-        } catch (Exception e) {
-            log.debug("Link reachability check failed for {}: {}", candidateUrl, e.getMessage());
-            flags.add("REACHABILITY_CHECK_FAILED: " + e.getMessage());
-            threatScore += 15;
         }
 
         RiskLabel label;
