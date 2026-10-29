@@ -79,6 +79,7 @@ export interface JobFilters {
   q?: string;
   company?: string;
   location?: string;
+  country?: string;
   jobType?: string;
   experienceLevel?: string;
   workMode?: string;

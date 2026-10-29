@@ -17,9 +17,17 @@ public class JobFilterRequest {
     private ExperienceLevel experienceLevel;
     private WorkMode workMode;
     private String category;
+    private String country = "India";
     private int page = 0;
     private int size = 20;
     private String sort = "publishedAt";
+
+    public String getCountry() {
+        if (country == null || country.trim().isEmpty()) {
+            return "India";
+        }
+        return country.trim();
+    }
 
     public int getValidatedSize() {
         return Math.min(Math.max(size, 1), 50);

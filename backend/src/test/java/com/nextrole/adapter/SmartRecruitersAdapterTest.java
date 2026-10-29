@@ -57,4 +57,22 @@ class SmartRecruitersAdapterTest {
         assertThat(job.experienceLevel()).isEqualTo(ExperienceLevel.FRESHER);
         assertThat(job.applyUrl()).isEqualTo("https://jobs.smartrecruiters.com/bosch/sr-9988");
     }
+
+    @Test
+    @DisplayName("Blank location in SmartRecruiters is classified as Unknown and not India")
+    void testBlankLocationNotIndia() throws Exception {
+        String json = """
+            {
+                "id": "sr-blank",
+                "name": "Developer",
+                "location": {}
+            }
+            """;
+
+        JsonNode node = objectMapper.readTree(json);
+        NormalizedJob job = adapter.normalizePosting(node, "bosch");
+
+        assertThat(job).isNotNull();
+        assertThat(job.country()).isEqualTo("Unknown");
+    }
 }

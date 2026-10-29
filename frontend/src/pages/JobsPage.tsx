@@ -16,6 +16,7 @@ export default function JobsPage() {
       q: searchParams.get('q') || undefined,
       company: searchParams.get('company') || undefined,
       location: searchParams.get('location') || undefined,
+      country: searchParams.get('country') || undefined,
       jobType: searchParams.get('jobType') || undefined,
       experienceLevel: searchParams.get('experienceLevel') || undefined,
       workMode: searchParams.get('workMode') || undefined,

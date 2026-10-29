@@ -140,7 +140,7 @@ public class JobSyncOrchestrator {
                             .title(normalized.title())
                             .description(normalized.description())
                             .location(normalized.location())
-                            .country(normalized.country() != null ? normalized.country() : "India")
+                            .country(normalized.country() != null && !normalized.country().isBlank() ? normalized.country() : "Unknown")
                             .jobType(normalized.jobType())
                             .experienceLevel(normalized.experienceLevel())
                             .workMode(normalized.workMode())

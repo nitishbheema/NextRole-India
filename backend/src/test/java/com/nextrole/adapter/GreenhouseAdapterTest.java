@@ -96,4 +96,29 @@ class GreenhouseAdapterTest {
 
         assertThat(job).isNull();
     }
+
+    @Test
+    @DisplayName("Foreign location and missing location are not mislabeled as India")
+    void testForeignAndMissingLocationCountry() throws Exception {
+        String foreignJson = """
+            {
+                "id": "555",
+                "title": "Staff Engineer",
+                "absolute_url": "https://boards.greenhouse.io/tw/jobs/555",
+                "location": { "name": "Hamburg, Germany" }
+            }
+            """;
+        NormalizedJob foreignJob = adapter.normalizeJob(objectMapper.readTree(foreignJson));
+        assertThat(foreignJob.country()).isEqualTo("Germany");
+
+        String nullLocationJson = """
+            {
+                "id": "666",
+                "title": "Staff Engineer",
+                "absolute_url": "https://boards.greenhouse.io/tw/jobs/666"
+            }
+            """;
+        NormalizedJob blankJob = adapter.normalizeJob(objectMapper.readTree(nullLocationJson));
+        assertThat(blankJob.country()).isEqualTo("Unknown");
+    }
 }

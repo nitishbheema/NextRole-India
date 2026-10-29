@@ -47,6 +47,7 @@ class AshbyAdapterTest {
         assertThat(job.sourceJobId()).isEqualTo("ashby-456");
         assertThat(job.title()).isEqualTo("Staff Backend Engineer");
         assertThat(job.location()).isEqualTo("Mumbai, India");
+        assertThat(job.country()).isEqualTo("India");
         assertThat(job.applyUrl()).isEqualTo("https://careers.cred.club/job/ashby-456");
         assertThat(job.jobType()).isEqualTo(JobType.FULL_TIME);
         assertThat(job.experienceLevel()).isEqualTo(ExperienceLevel.EXECUTIVE);
@@ -68,5 +69,24 @@ class AshbyAdapterTest {
         NormalizedJob job = adapter.normalizePosting(node, "cred");
 
         assertThat(job).isNull();
+    }
+
+    @Test
+    @DisplayName("Blank location in Ashby is classified as Unknown and not India")
+    void testBlankLocationNotIndia() throws Exception {
+        String json = """
+            {
+                "id": "ashby-blank",
+                "title": "Engineer",
+                "locationName": "",
+                "isListed": true
+            }
+            """;
+
+        JsonNode node = objectMapper.readTree(json);
+        NormalizedJob job = adapter.normalizePosting(node, "cred");
+
+        assertThat(job).isNotNull();
+        assertThat(job.country()).isEqualTo("Unknown");
     }
 }

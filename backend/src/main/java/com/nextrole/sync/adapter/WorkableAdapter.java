@@ -151,7 +151,7 @@ public class WorkableAdapter implements JobSourceAdapter {
                 title,
                 "",
                 location,
-                detectCountry(location),
+                detectCountry(location, country),
                 jobType,
                 experienceLevel,
                 workMode,
@@ -162,15 +162,8 @@ public class WorkableAdapter implements JobSourceAdapter {
         );
     }
 
-    private String detectCountry(String location) {
-        if (location == null) return "India";
-        String lower = location.toLowerCase();
-        if (lower.contains("india") || lower.contains("bengaluru") || lower.contains("bangalore") ||
-                lower.contains("hyderabad") || lower.contains("pune") || lower.contains("chennai") ||
-                lower.contains("mumbai") || lower.contains("delhi") || lower.contains("noida") || lower.contains("gurugram")) {
-            return "India";
-        }
-        return "Global";
+    private String detectCountry(String location, String rawCountry) {
+        return com.nextrole.sync.util.CountryDetector.detectCountry(location, rawCountry);
     }
 
     private JobType detectJobType(String raw) {

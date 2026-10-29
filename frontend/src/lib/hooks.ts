@@ -49,6 +49,7 @@ export function useJobs(filters: JobFilters) {
       if (filters.jobType) params.jobType = filters.jobType;
       if (filters.experienceLevel) params.experienceLevel = filters.experienceLevel;
       if (filters.workMode) params.workMode = filters.workMode;
+      if (filters.country) params.country = filters.country;
       if (filters.page !== undefined) params.page = filters.page;
       if (filters.size !== undefined) params.size = filters.size;
 
@@ -64,6 +65,7 @@ export function useJobs(filters: JobFilters) {
     filters.q,
     filters.company,
     filters.location,
+    filters.country,
     filters.jobType,
     filters.experienceLevel,
     filters.workMode,

@@ -161,17 +161,7 @@ public class GreenhouseAdapter implements JobSourceAdapter {
     }
 
     private String detectCountry(String location) {
-        if (location == null || location.isBlank()) {
-            return "India";
-        }
-        String lower = location.toLowerCase();
-        if (lower.contains("india") || lower.contains("bengaluru") || lower.contains("bangalore")
-                || lower.contains("mumbai") || lower.contains("delhi") || lower.contains("hyderabad")
-                || lower.contains("pune") || lower.contains("chennai") || lower.contains("kolkata")
-                || lower.contains("gurgaon") || lower.contains("noida")) {
-            return "India";
-        }
-        return location;
+        return com.nextrole.sync.util.CountryDetector.detectCountry(location);
     }
 
     private JobType inferJobType(String title, JsonNode node) {

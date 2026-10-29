@@ -838,11 +838,11 @@
     "careersUrl": "https://www.inmobi.com/company/careers",
     "sourceType": "GREENHOUSE",
     "boardIdentifier": "inmobi",
-    "integrationStatus": "NEEDS_VERIFICATION",
-    "lastCheckedAt": "2026-10-28T00:00:00Z",
-    "lastSuccessAt": null,
+    "integrationStatus": "ACTIVE_IMPORT",
+    "lastCheckedAt": "2026-10-29T00:00:00Z",
+    "lastSuccessAt": "2026-10-29T00:00:00Z",
     "errorMessage": null,
-    "notes": "Greenhouse integration under verification."
+    "notes": "Verified active Greenhouse feed with engineering roles in Bengaluru, India."
   },
   {
     "id": 66,
@@ -877,11 +877,11 @@
     "careersUrl": "https://www.druva.com/about/careers",
     "sourceType": "GREENHOUSE",
     "boardIdentifier": "druva",
-    "integrationStatus": "NEEDS_VERIFICATION",
-    "lastCheckedAt": "2026-10-28T00:00:00Z",
-    "lastSuccessAt": null,
+    "integrationStatus": "ACTIVE_IMPORT",
+    "lastCheckedAt": "2026-10-29T00:00:00Z",
+    "lastSuccessAt": "2026-10-29T00:00:00Z",
     "errorMessage": null,
-    "notes": "Greenhouse token under verification."
+    "notes": "Verified active Greenhouse feed with engineering and consultant roles in Pune, India."
   },
   {
     "id": 69,
@@ -1766,5 +1766,31 @@
     "lastSuccessAt": null,
     "errorMessage": null,
     "notes": "Fintech infra; competitive. Verified active hiring pipelines from verified startups registry."
+  },
+  {
+    "id": 137,
+    "name": "Thoughtworks",
+    "category": "IT Services & Consulting",
+    "careersUrl": "https://www.thoughtworks.com/en-in/careers",
+    "sourceType": "GREENHOUSE",
+    "boardIdentifier": "thoughtworks",
+    "integrationStatus": "ACTIVE_IMPORT",
+    "lastCheckedAt": "2026-10-29T00:00:00Z",
+    "lastSuccessAt": "2026-10-29T00:00:00Z",
+    "errorMessage": null,
+    "notes": "Verified active Greenhouse feed with engineering roles in Bangalore, India."
+  },
+  {
+    "id": 138,
+    "name": "Instawork",
+    "category": "Indian Startups & Tech",
+    "careersUrl": "https://www.instawork.com/careers",
+    "sourceType": "GREENHOUSE",
+    "boardIdentifier": "instawork",
+    "integrationStatus": "ACTIVE_IMPORT",
+    "lastCheckedAt": "2026-10-29T00:00:00Z",
+    "lastSuccessAt": "2026-10-29T00:00:00Z",
+    "errorMessage": null,
+    "notes": "Verified active Greenhouse feed with engineering and operations roles in Bengaluru, India."
   }
 ]

@@ -47,7 +47,7 @@ public class Job {
 
     @Builder.Default
     @Column(length = 100)
-    private String country = "India";
+    private String country = "Unknown";
 
     @Enumerated(EnumType.STRING)
     @Column(name = "job_type", length = 50)

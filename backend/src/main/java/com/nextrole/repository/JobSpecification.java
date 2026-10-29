@@ -57,6 +57,12 @@ public class JobSpecification {
                 predicates.add(cb.equal(root.get("workMode"), request.getWorkMode()));
             }
 
+            // Country filter (default India; 'ALL' or 'all' returns global)
+            String targetCountry = request.getCountry();
+            if (targetCountry != null && !targetCountry.equalsIgnoreCase("ALL")) {
+                predicates.add(cb.equal(cb.lower(root.get("country")), targetCountry.toLowerCase()));
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

@@ -83,4 +83,23 @@ class LeverAdapterTest {
         assertThat(job.closed()).isTrue();
         assertThat(job.jobType()).isEqualTo(JobType.INTERNSHIP);
     }
+
+    @Test
+    @DisplayName("Blank location in Lever is classified as Unknown and not India")
+    void testBlankLocationNotIndia() throws Exception {
+        String json = """
+            {
+                "id": "lever-blank",
+                "text": "Developer",
+                "hostedUrl": "https://jobs.lever.co/gojek/lever-blank",
+                "categories": {}
+            }
+            """;
+
+        JsonNode node = objectMapper.readTree(json);
+        NormalizedJob job = adapter.normalizePosting(node, "gojek");
+
+        assertThat(job).isNotNull();
+        assertThat(job.country()).isEqualTo("Unknown");
+    }
 }

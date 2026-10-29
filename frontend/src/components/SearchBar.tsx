@@ -36,6 +36,11 @@ const WORK_MODES = [
   { value: 'ONSITE', label: 'On-site' },
 ];
 
+const COUNTRY_OPTIONS = [
+  { value: '', label: '🇮🇳 India (Default)' },
+  { value: 'ALL', label: '🌐 All / Global' },
+];
+
 export default function SearchBar({ filters, onChange, onClear }: SearchBarProps) {
   const [localQ, setLocalQ] = React.useState(filters.q ?? '');
   const debouncedQ = useDebounce(localQ, 400);
@@ -58,6 +63,7 @@ export default function SearchBar({ filters, onChange, onClear }: SearchBarProps
   const hasActiveFilters =
     filters.q ||
     filters.location ||
+    filters.country ||
     filters.jobType ||
     filters.experienceLevel ||
     filters.workMode;
@@ -135,6 +141,20 @@ export default function SearchBar({ filters, onChange, onClear }: SearchBarProps
           {WORK_MODES.map((m) => (
             <option key={m.value} value={m.value}>
               {m.label}
+            </option>
+          ))}
+        </select>
+
+        {/* Country Filter */}
+        <select
+          value={filters.country ?? ''}
+          onChange={(e) => onChange({ country: e.target.value || undefined, page: 0 })}
+          className="px-3 py-2 rounded-xl border border-brand-200 text-sm font-medium text-brand-700 bg-brand-50/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+          aria-label="Filter by country"
+        >
+          {COUNTRY_OPTIONS.map((c) => (
+            <option key={c.value} value={c.value}>
+              {c.label}
             </option>
           ))}
         </select>

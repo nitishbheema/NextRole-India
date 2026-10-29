@@ -121,20 +121,104 @@ class JobSpecificationTest {
                 .build();
         entityManager.persist(expiredJob);
 
+        Job foreignJob = Job.builder()
+                .company(company1)
+                .source(source1)
+                .sourceJobId("tw-foreign")
+                .title("Principal Architect")
+                .description("Distributed backend systems in Germany")
+                .location("Hamburg, Germany")
+                .country("Germany")
+                .jobType(JobType.FULL_TIME)
+                .experienceLevel(ExperienceLevel.LEAD)
+                .workMode(WorkMode.ONSITE)
+                .applyUrl("https://apply.tw/foreign")
+                .status(JobStatus.ACTIVE)
+                .publishedAt(LocalDateTime.now().minusDays(1))
+                .firstSeenAt(LocalDateTime.now().minusDays(1))
+                .lastSeenAt(LocalDateTime.now())
+                .lastVerifiedAt(LocalDateTime.now())
+                .build();
+        entityManager.persist(foreignJob);
+
+        Job unknownJob = Job.builder()
+                .company(company1)
+                .source(source1)
+                .sourceJobId("tw-remote")
+                .title("Remote Generalist")
+                .description("Unspecified remote role")
+                .location("Remote")
+                .country("Remote")
+                .jobType(JobType.FULL_TIME)
+                .experienceLevel(ExperienceLevel.MID)
+                .workMode(WorkMode.REMOTE)
+                .applyUrl("https://apply.tw/remote")
+                .status(JobStatus.ACTIVE)
+                .publishedAt(LocalDateTime.now().minusDays(1))
+                .firstSeenAt(LocalDateTime.now().minusDays(1))
+                .lastSeenAt(LocalDateTime.now())
+                .lastVerifiedAt(LocalDateTime.now())
+                .build();
+        entityManager.persist(unknownJob);
+
         entityManager.flush();
     }
 
     @Test
-    @DisplayName("Fetch without filters returns all active jobs, excludes expired")
+    @DisplayName("Default query filters by country=India; excludes expired and foreign jobs")
     void testFindAllWithoutFilters() {
         JobFilterRequest request = new JobFilterRequest();
         Specification<Job> spec = JobSpecification.withFilters(request);
 
         Page<Job> result = jobRepository.findAll(spec, PageRequest.of(0, 10));
 
+        // Returns only the 2 active India jobs; excludes expired, Germany, and Remote jobs
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent()).extracting(Job::getTitle)
                 .containsExactlyInAnyOrder("Senior Java Developer", "Graduate QA Engineer");
+        assertThat(result.getContent()).allMatch(j -> j.getCountry().equalsIgnoreCase("India"));
+    }
+
+    @Test
+    @DisplayName("country=ALL explicitly requests global listings (includes India, foreign, and remote)")
+    void testCountryAllReturnsGlobalListings() {
+        JobFilterRequest request = new JobFilterRequest();
+        request.setCountry("ALL");
+        Specification<Job> spec = JobSpecification.withFilters(request);
+
+        Page<Job> result = jobRepository.findAll(spec, PageRequest.of(0, 10));
+
+        // Returns 4 active jobs (2 India, 1 Germany, 1 Remote); still excludes expired
+        assertThat(result.getTotalElements()).isEqualTo(4);
+        assertThat(result.getContent()).extracting(Job::getTitle)
+                .containsExactlyInAnyOrder("Senior Java Developer", "Graduate QA Engineer", "Principal Architect", "Remote Generalist");
+    }
+
+    @Test
+    @DisplayName("Explicit foreign country filter returns only listings for that country")
+    void testExplicitForeignCountryFilter() {
+        JobFilterRequest request = new JobFilterRequest();
+        request.setCountry("Germany");
+        Specification<Job> spec = JobSpecification.withFilters(request);
+
+        Page<Job> result = jobRepository.findAll(spec, PageRequest.of(0, 10));
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getTitle()).isEqualTo("Principal Architect");
+        assertThat(result.getContent().get(0).getCountry()).isEqualTo("Germany");
+    }
+
+    @Test
+    @DisplayName("Case-insensitive country matching handles lowercase or mixed case")
+    void testCaseInsensitiveCountryFilter() {
+        JobFilterRequest request = new JobFilterRequest();
+        request.setCountry("india");
+        Specification<Job> spec = JobSpecification.withFilters(request);
+
+        Page<Job> result = jobRepository.findAll(spec, PageRequest.of(0, 10));
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent()).allMatch(j -> j.getCountry().equalsIgnoreCase("India"));
     }
 
     @Test

@@ -51,4 +51,21 @@ class WorkableAdapterTest {
         assertThat(job.jobType()).isEqualTo(JobType.FULL_TIME);
         assertThat(job.applyUrl()).isEqualTo("https://apply.workable.com/cred/j/WRK-501/");
     }
+
+    @Test
+    @DisplayName("Blank location in Workable is classified as Unknown and not India")
+    void testBlankLocationNotIndia() throws Exception {
+        String json = """
+            {
+                "shortcode": "WRK-blank",
+                "title": "Engineer"
+            }
+            """;
+
+        JsonNode node = objectMapper.readTree(json);
+        NormalizedJob job = adapter.normalizePosting(node, "cred");
+
+        assertThat(job).isNotNull();
+        assertThat(job.country()).isEqualTo("Unknown");
+    }
 }
