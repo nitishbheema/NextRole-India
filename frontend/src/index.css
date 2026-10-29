@@ -56,3 +56,136 @@ h1, h2, h3, h4, .font-heading {
   border-color: #a8d9bd;
   box-shadow: 0 12px 32px rgba(18, 65, 48, 0.08);
 }
+
+/* ── Job Description Content Typography & Spacing ── */
+.job-description-content h1 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #172b25;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.job-description-content h2 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #172b25;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e7ede9;
+  letter-spacing: -0.02em;
+}
+
+.job-description-content h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #172b25;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.job-description-content h4,
+.job-description-content h5,
+.job-description-content h6 {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #172b25;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.job-description-content p {
+  color: #2d4036;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.job-description-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: #2d4036;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.job-description-content ul li::marker {
+  color: #087f5b;
+}
+
+.job-description-content ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: #2d4036;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.job-description-content ol li::marker {
+  color: #087f5b;
+  font-weight: 700;
+}
+
+.job-description-content li {
+  padding-left: 0.25rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.job-description-content strong,
+.job-description-content b {
+  font-weight: 700;
+  color: #172b25;
+}
+
+.job-description-content a {
+  color: #087f5b;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.15s ease;
+  word-break: break-word;
+}
+
+.job-description-content a:hover {
+  color: #075e45;
+}
+
+.job-description-content hr {
+  border: 0;
+  border-top: 1px solid #e2ebe6;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.job-description-content blockquote {
+  border-left: 3px solid #087f5b;
+  background-color: #eff8f2;
+  padding: 0.75rem 1rem;
+  border-radius: 0 0.75rem 0.75rem 0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: #233c2e;
+}
+
+.job-description-content code {
+  background-color: #eaf4ee;
+  color: #087f5b;
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.8125rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}

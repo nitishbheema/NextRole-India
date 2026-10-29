@@ -18,104 +18,7 @@ import {
   Globe
 } from 'lucide-react';
 import { isJobSaved, toggleSaveJob } from '../lib/savedJobs';
-
-// ── Structured Job Description Component (Safe, No dangerouslySetInnerHTML) ──
-function FormattedDescription({ text }: { text?: string }) {
-  if (!text || text.trim() === '') {
-    return (
-      <p className="text-sm text-[#708479] italic">
-        No detailed description provided by the employer. Please visit the official career page for complete responsibilities and qualifications.
-      </p>
-    );
-  }
-
-  // Split into paragraphs by double newlines or single newlines
-  const blocks = text.split(/\n{2,}/);
-
-  return (
-    <div className="space-y-4 text-sm leading-relaxed text-[#23352b]">
-      {blocks.map((block, idx) => {
-        const trimmed = block.trim();
-        if (!trimmed) return null;
-
-        // Heading detection
-        if (trimmed.startsWith('### ')) {
-          return (
-            <h3
-              key={idx}
-              className="font-display font-bold text-base text-[#172b25] mt-6 mb-2 tracking-tight flex items-center gap-2 pt-2 border-t border-[#edf3ef] first:border-0 first:pt-0"
-            >
-              <span className="w-1.5 h-4 bg-[#087f5b] rounded-full inline-block" />
-              {trimmed.substring(4)}
-            </h3>
-          );
-        }
-
-        if (trimmed.startsWith('## ') || trimmed.startsWith('# ')) {
-          return (
-            <h2
-              key={idx}
-              className="font-display font-bold text-lg text-[#172b25] mt-6 mb-2 tracking-tight"
-            >
-              {trimmed.replace(/^#+\s*/, '')}
-            </h2>
-          );
-        }
-
-        // Bullet point list detection
-        const lines = trimmed.split('\n');
-        const isBulletList = lines.every((line) => line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*'));
-
-        if (isBulletList) {
-          return (
-            <ul key={idx} className="space-y-2 my-3 pl-1">
-              {lines.map((line, lIdx) => {
-                const cleanText = line.replace(/^[•\-\*]\s*/, '').trim();
-                if (!cleanText) return null;
-                return (
-                  <li key={lIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-[#2d4036] leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#087f5b] mt-2 shrink-0" />
-                    <span>{cleanText}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          );
-        }
-
-        // Regular paragraph or mixed bullet lines
-        if (lines.length > 1 && lines.some((line) => line.trim().startsWith('•') || line.trim().startsWith('-'))) {
-          return (
-            <div key={idx} className="space-y-2 my-2">
-              {lines.map((line, lIdx) => {
-                const lTrim = line.trim();
-                if (lTrim.startsWith('•') || lTrim.startsWith('-') || lTrim.startsWith('*')) {
-                  return (
-                    <div key={lIdx} className="flex items-start gap-2.5 pl-2 text-xs sm:text-sm text-[#2d4036] leading-relaxed">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#087f5b] mt-2 shrink-0" />
-                      <span>{lTrim.replace(/^[•\-\*]\s*/, '')}</span>
-                    </div>
-                  );
-                }
-                return (
-                  <p key={lIdx} className="text-xs sm:text-sm text-[#2d4036] leading-relaxed">
-                    {lTrim}
-                  </p>
-                );
-              })}
-            </div>
-          );
-        }
-
-        return (
-          <p key={idx} className="text-xs sm:text-sm text-[#2d4036] leading-relaxed">
-            {trimmed}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
+import JobDescriptionRenderer from '../components/JobDescriptionRenderer';
 
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -293,7 +196,7 @@ export default function JobDetailPage() {
                 Role Description & Requirements
               </h2>
               <div className="bg-[#f9fbf9] p-5 sm:p-7 rounded-2xl border border-[#e7ede9]">
-                <FormattedDescription text={job.description} />
+                <JobDescriptionRenderer description={job.description} />
               </div>
             </div>
 

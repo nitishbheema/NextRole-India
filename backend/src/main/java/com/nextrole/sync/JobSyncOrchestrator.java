@@ -9,6 +9,7 @@ import com.nextrole.repository.JobSourceRepository;
 import com.nextrole.repository.SyncRunRepository;
 import com.nextrole.sync.adapter.JobSourceAdapter;
 import com.nextrole.sync.model.NormalizedJob;
+import com.nextrole.util.HtmlDescriptionSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -138,7 +139,7 @@ public class JobSyncOrchestrator {
                             .source(source)
                             .sourceJobId(normalized.sourceJobId())
                             .title(normalized.title())
-                            .description(normalized.description())
+                            .description(HtmlDescriptionSanitizer.sanitize(normalized.description()))
                             .location(normalized.location())
                             .country(normalized.country() != null && !normalized.country().isBlank() ? normalized.country() : "Unknown")
                             .jobType(normalized.jobType())
@@ -159,7 +160,7 @@ public class JobSyncOrchestrator {
                     Job existing = existingOpt.get();
                     existing.setTitle(normalized.title());
                     if (normalized.description() != null && !normalized.description().isBlank()) {
-                        existing.setDescription(normalized.description());
+                        existing.setDescription(HtmlDescriptionSanitizer.sanitize(normalized.description()));
                     }
                     existing.setLocation(normalized.location());
                     if (normalized.country() != null) existing.setCountry(normalized.country());

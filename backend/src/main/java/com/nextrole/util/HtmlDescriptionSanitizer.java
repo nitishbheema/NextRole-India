@@ -1,158 +1,208 @@
 package com.nextrole.util;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
+import org.jsoup.safety.Safelist;
+import org.jsoup.select.Elements;
+
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Utility for sanitizing HTML descriptions from job sources into structured,
- * safe text while preserving headings, paragraphs, and bullet lists.
+ * Utility for normalizing and sanitizing HTML & plain-text job descriptions.
+ * Handles entity-escaped HTML (such as Greenhouse feeds), backslash-escaped tags,
+ * markdown-in-attribute anomalies, and plain text, while strictly stripping unsafe
+ * scripts, styles, event handlers, and invalid protocols.
  */
 public final class HtmlDescriptionSanitizer {
 
-    private static final Pattern SCRIPT_STYLE_PATTERN = Pattern.compile(
-            "<(script|style|iframe|object|embed)[^>]*?>.*?</\\1>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+    // Matches escaped HTML tags like \<p>, \<div>, \</h2>, \<br />, etc.
+    private static final Pattern ESCAPED_TAG_PATTERN = Pattern.compile(
+            "\\\\<(/?[a-zA-Z][a-zA-Z0-9:-]*(?:\\s+[^>]*?)?)\\\\?>|\\\\<(/?[a-zA-Z][a-zA-Z0-9:-]*)\\\\?>"
     );
 
-    private static final Pattern HEADING_PATTERN = Pattern.compile(
-            "<h[1-6][^>]*>(.*?)</h[1-6]>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
+    // Matches closing angle brackets that were escaped: \>
+    private static final Pattern ESCAPED_CLOSE_BRACKET = Pattern.compile("\\\\>");
 
-    private static final Pattern LI_PATTERN = Pattern.compile(
-            "<li[^>]*>",
+    // Matches target="\_blank" or target="\\_blank"
+    private static final Pattern ESCAPED_TARGET_PATTERN = Pattern.compile(
+            "target=([\"'])\\\\+(_[a-zA-Z]+)([\"'])",
             Pattern.CASE_INSENSITIVE
     );
 
-    private static final Pattern BR_PATTERN = Pattern.compile(
-            "<br\\s*/?>",
+    // Matches markdown-formatted links embedded in href attributes: href="[https://...](https://...)"
+    private static final Pattern MARKDOWN_IN_HREF_PATTERN = Pattern.compile(
+            "href=([\"'])\\s*\\[(?:[^\\]]*)\\]\\((https?://[^)\\s\"']+)\\)\\s*([\"'])",
             Pattern.CASE_INSENSITIVE
     );
 
-    private static final Pattern BLOCK_PATTERN = Pattern.compile(
-            "</?(p|div|tr|ul|ol|table|section|article)[^>]*>",
+    // Checks if the string contains entity-encoded HTML tags: e.g. &lt;div, &lt;p&gt;, &lt;h2
+    private static final Pattern ENTITY_ENCODED_TAG_PATTERN = Pattern.compile(
+            "&lt;\\s*/?(?:div|p|h[1-6]|ul|ol|li|strong|b|em|i|u|br|a|span|section|article|blockquote|table|tr|td|th)\\b",
             Pattern.CASE_INSENSITIVE
     );
 
-    private static final Pattern ALL_TAGS_PATTERN = Pattern.compile(
-            "<[^>]+>"
+    // Checks if string contains standard HTML tags
+    private static final Pattern ANY_HTML_TAG_PATTERN = Pattern.compile(
+            "</?[a-zA-Z][a-zA-Z0-9:-]*(?:\\s+[^>]*)?>",
+            Pattern.CASE_INSENSITIVE
     );
 
-    private static final Pattern DECIMAL_ENTITY_PATTERN = Pattern.compile("&#([0-9]+);");
-    private static final Pattern HEX_ENTITY_PATTERN = Pattern.compile("&#x([0-9a-fA-F]+);");
+    private static final Safelist SAFELIST = Safelist.relaxed()
+            .addTags("h1", "h2", "h3", "h4", "h5", "h6", "hr")
+            .addAttributes("a", "target", "rel", "title")
+            .addAttributes("span", "class")
+            .addAttributes("div", "class", "id")
+            .addAttributes("h1", "id", "class")
+            .addAttributes("h2", "id", "class")
+            .addAttributes("h3", "id", "class")
+            .addAttributes("h4", "id", "class")
+            .addAttributes("h5", "id", "class")
+            .addAttributes("h6", "id", "class")
+            .addAttributes("th", "colspan", "rowspan", "scope")
+            .addAttributes("td", "colspan", "rowspan")
+            .removeProtocols("a", "href", "javascript", "data", "vbscript", "file")
+            .addProtocols("a", "href", "http", "https", "mailto");
+
+    private static final Document.OutputSettings OUTPUT_SETTINGS = new Document.OutputSettings()
+            .prettyPrint(true)
+            .syntax(Document.OutputSettings.Syntax.html)
+            .charset(StandardCharsets.UTF_8);
 
     private HtmlDescriptionSanitizer() {
     }
 
+    /**
+     * Normalizes and sanitizes a job description, returning clean, secure HTML.
+     */
     public static String sanitize(String input) {
         if (input == null || input.isBlank()) {
             return "";
         }
 
-        // 1. Remove dangerous blocks and their contents
-        String text = SCRIPT_STYLE_PATTERN.matcher(input).replaceAll("");
+        // 1. First normalize raw string anomalies (backslashes, markdown links in href, escaped targets)
+        String normalized = normalizeRawText(input);
 
-        // 2. Standardize carriage returns
-        text = text.replace("\r\n", "\n").replace("\r", "\n");
-
-        // 3. Format headings with markdown-style indicators
-        Matcher headingMatcher = HEADING_PATTERN.matcher(text);
-        StringBuilder headingBuffer = new StringBuilder();
-        while (headingMatcher.find()) {
-            String inner = headingMatcher.group(1).replaceAll("<[^>]+>", "").trim();
-            headingMatcher.appendReplacement(headingBuffer, Matcher.quoteReplacement("\n\n### " + inner + "\n\n"));
-        }
-        headingMatcher.appendTail(headingBuffer);
-        text = headingBuffer.toString();
-
-        // 4. Preserve bullet points from <li> tags
-        text = LI_PATTERN.matcher(text).replaceAll("\n• ");
-
-        // 5. Convert <br> to newline
-        text = BR_PATTERN.matcher(text).replaceAll("\n");
-
-        // 6. Convert common block boundaries to newlines
-        text = BLOCK_PATTERN.matcher(text).replaceAll("\n\n");
-
-        // 7. Strip all remaining HTML tags
-        text = ALL_TAGS_PATTERN.matcher(text).replaceAll(" ");
-
-        // 8. Decode HTML entities
-        text = decodeHtmlEntities(text);
-
-        // 9. Clean up whitespace: trim lines and collapse excessive line breaks
-        String[] lines = text.split("\n");
-        StringBuilder cleaned = new StringBuilder();
-        int consecutiveEmptyLines = 0;
-
-        for (String line : lines) {
-            String trimmed = line.trim().replaceAll("[ \\t]{2,}", " ");
-            if (trimmed.isEmpty()) {
-                consecutiveEmptyLines++;
-                if (consecutiveEmptyLines <= 2) {
-                    cleaned.append("\n");
-                }
-            } else {
-                consecutiveEmptyLines = 0;
-                if (cleaned.length() > 0 && cleaned.charAt(cleaned.length() - 1) != '\n') {
-                    cleaned.append("\n");
-                }
-                cleaned.append(trimmed).append("\n");
-            }
+        // 2. Detect and unescape entity-encoded HTML tags if present (e.g. Greenhouse API &lt;div...&gt;)
+        if (ENTITY_ENCODED_TAG_PATTERN.matcher(normalized).find()) {
+            normalized = Parser.unescapeEntities(normalized, false);
+            // Re-apply normalization in case unescaped entities revealed escaped targets or backslashes
+            normalized = normalizeRawText(normalized);
         }
 
-        return cleaned.toString().trim();
+        // 3. Handle pure plain-text descriptions (e.g. from plain-text feeds or employer manual submissions)
+        if (!ANY_HTML_TAG_PATTERN.matcher(normalized).find()) {
+            normalized = convertPlainTextToHtml(normalized);
+        }
+
+        // 4. Sanitize with Jsoup Safelist
+        String cleanHtml = Jsoup.clean(normalized, "", SAFELIST, OUTPUT_SETTINGS);
+
+        // 5. Post-process elements (ensure safe external link attributes)
+        Document doc = Jsoup.parseBodyFragment(cleanHtml);
+        Elements links = doc.select("a[href]");
+        for (Element link : links) {
+            link.attr("target", "_blank");
+            link.attr("rel", "noopener noreferrer");
+        }
+
+        return doc.body().html().trim();
     }
 
-    private static String decodeHtmlEntities(String input) {
-        if (input == null || !input.contains("&")) {
-            return input;
+    /**
+     * Unescapes backslash-escaped tags and fixes attribute formatting glitches.
+     */
+    private static String normalizeRawText(String input) {
+        if (input == null) return "";
+
+        String text = input;
+
+        // Fix markdown links in href: href="[https://example.com](https://example.com)" -> href="https://example.com"
+        text = MARKDOWN_IN_HREF_PATTERN.matcher(text).replaceAll("href=$1$2$3");
+
+        // Fix target="\_blank" -> target="_blank"
+        text = ESCAPED_TARGET_PATTERN.matcher(text).replaceAll("target=$1$2$3");
+
+        // Fix \<tag> or \<tag\> -> <tag>
+        Matcher tagMatcher = ESCAPED_TAG_PATTERN.matcher(text);
+        StringBuilder sb = new StringBuilder();
+        while (tagMatcher.find()) {
+            String tagContent = tagMatcher.group(1) != null ? tagMatcher.group(1) : tagMatcher.group(2);
+            tagMatcher.appendReplacement(sb, Matcher.quoteReplacement("<" + tagContent + ">"));
+        }
+        tagMatcher.appendTail(sb);
+        text = sb.toString();
+
+        // Fix stray closing \>
+        text = ESCAPED_CLOSE_BRACKET.matcher(text).replaceAll(">");
+
+        return text;
+    }
+
+    /**
+     * Converts plain text with paragraphs and list bullets into semantic HTML.
+     */
+    private static String convertPlainTextToHtml(String plainText) {
+        if (plainText == null || plainText.isBlank()) {
+            return "";
         }
 
-        String text = input
-                .replace("&amp;", "&")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&quot;", "\"")
-                .replace("&#39;", "'")
-                .replace("&apos;", "'")
-                .replace("&nbsp;", " ")
-                .replace("&bull;", "•")
-                .replace("&middot;", "·")
-                .replace("&ndash;", "–")
-                .replace("&mdash;", "—")
-                .replace("&rsquo;", "'")
-                .replace("&lsquo;", "'")
-                .replace("&rdquo;", "\"")
-                .replace("&ldquo;", "\"");
+        // Standardize line breaks
+        String text = plainText.replace("\r\n", "\n").replace("\r", "\n");
+        String[] lines = text.split("\n");
+        StringBuilder html = new StringBuilder();
 
-        // Decode decimal entities &#123;
-        Matcher decMatcher = DECIMAL_ENTITY_PATTERN.matcher(text);
-        StringBuilder decBuffer = new StringBuilder();
-        while (decMatcher.find()) {
-            try {
-                int codePoint = Integer.parseInt(decMatcher.group(1));
-                decMatcher.appendReplacement(decBuffer, Matcher.quoteReplacement(new String(Character.toChars(codePoint))));
-            } catch (Exception e) {
-                decMatcher.appendReplacement(decBuffer, "");
+        java.util.List<String> currentBullets = new java.util.ArrayList<>();
+        java.util.List<String> currentParagraph = new java.util.ArrayList<>();
+
+        Runnable flushBullets = () -> {
+            if (!currentBullets.isEmpty()) {
+                html.append("<ul>\n");
+                for (String bullet : currentBullets) {
+                    html.append("  <li>").append(Parser.escapeEntities(bullet, OUTPUT_SETTINGS)).append("</li>\n");
+                }
+                html.append("</ul>\n");
+                currentBullets.clear();
+            }
+        };
+
+        Runnable flushParagraph = () -> {
+            if (!currentParagraph.isEmpty()) {
+                html.append("<p>");
+                for (int i = 0; i < currentParagraph.size(); i++) {
+                    if (i > 0) html.append("<br>");
+                    html.append(Parser.escapeEntities(currentParagraph.get(i), OUTPUT_SETTINGS));
+                }
+                html.append("</p>\n");
+                currentParagraph.clear();
+            }
+        };
+
+        for (String rawLine : lines) {
+            String trimmedLine = rawLine.trim();
+            if (trimmedLine.isEmpty()) {
+                flushParagraph.run();
+                flushBullets.run();
+                continue;
+            }
+
+            if (trimmedLine.startsWith("•") || trimmedLine.startsWith("- ") || trimmedLine.startsWith("* ")) {
+                flushParagraph.run();
+                String clean = trimmedLine.replaceFirst("^[•\\-\\*]\\s*", "").trim();
+                if (!clean.isEmpty()) {
+                    currentBullets.add(clean);
+                }
+            } else {
+                flushBullets.run();
+                currentParagraph.add(trimmedLine);
             }
         }
-        decMatcher.appendTail(decBuffer);
-        text = decBuffer.toString();
+        flushParagraph.run();
+        flushBullets.run();
 
-        // Decode hex entities &#x1F;
-        Matcher hexMatcher = HEX_ENTITY_PATTERN.matcher(text);
-        StringBuilder hexBuffer = new StringBuilder();
-        while (hexMatcher.find()) {
-            try {
-                int codePoint = Integer.parseInt(hexMatcher.group(1), 16);
-                hexMatcher.appendReplacement(hexBuffer, Matcher.quoteReplacement(new String(Character.toChars(codePoint))));
-            } catch (Exception e) {
-                hexMatcher.appendReplacement(hexBuffer, "");
-            }
-        }
-        hexMatcher.appendTail(hexBuffer);
-
-        return hexBuffer.toString();
+        return html.toString();
     }
 }
