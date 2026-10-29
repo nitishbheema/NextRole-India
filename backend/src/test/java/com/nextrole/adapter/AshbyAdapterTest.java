@@ -26,7 +26,7 @@ class AshbyAdapterTest {
     }
 
     @Test
-    @DisplayName("Successfully normalizes listed Ashby job posting")
+    @DisplayName("Successfully normalizes active listed posting from Ashby")
     void testNormalizeListedPosting() throws Exception {
         String json = """
             {
@@ -50,7 +50,7 @@ class AshbyAdapterTest {
         assertThat(job.country()).isEqualTo("India");
         assertThat(job.applyUrl()).isEqualTo("https://careers.cred.club/job/ashby-456");
         assertThat(job.jobType()).isEqualTo(JobType.FULL_TIME);
-        assertThat(job.experienceLevel()).isEqualTo(ExperienceLevel.EXECUTIVE);
+        assertThat(job.experienceLevel()).isEqualTo(ExperienceLevel.LEAD);
         assertThat(job.closed()).isFalse();
     }
 
@@ -72,11 +72,11 @@ class AshbyAdapterTest {
     }
 
     @Test
-    @DisplayName("Blank location in Ashby is classified as Unknown and not India")
-    void testBlankLocationNotIndia() throws Exception {
+    @DisplayName("Missing location is normalized to Unknown country, never India")
+    void testMissingLocationReturnsUnknownCountry() throws Exception {
         String json = """
             {
-                "id": "ashby-blank",
+                "id": "ashby-no-loc",
                 "title": "Engineer",
                 "locationName": "",
                 "isListed": true

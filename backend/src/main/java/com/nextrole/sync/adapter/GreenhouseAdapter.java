@@ -170,7 +170,7 @@ public class GreenhouseAdapter implements JobSourceAdapter {
         if (lower.contains("contract")) return JobType.CONTRACT;
         if (lower.contains("part-time") || lower.contains("part time")) return JobType.PART_TIME;
         if (lower.contains("apprentice")) return JobType.APPRENTICESHIP;
-        if (lower.contains("graduate programme") || lower.contains("graduate program")) return JobType.GRADUATE_PROGRAMME;
+        if (lower.contains("graduate") || lower.contains("trainee")) return JobType.GRADUATE_PROGRAMME;
         return JobType.FULL_TIME;
     }
 
